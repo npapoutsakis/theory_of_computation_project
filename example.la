@@ -1,0 +1,7 @@
+ -- My first Lambda program. File: myprog.la  
+ 
+@defmacro  message =  "Hello world!\n"  
+
+def main():
+    writeStr(message);  
+enddef;
