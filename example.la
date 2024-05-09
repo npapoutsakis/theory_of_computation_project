@@ -3,5 +3,6 @@
 @defmacro message = "Hello world!\n"
 
 def main():
+    int Distance_02 = 1;
     writeStr(message);  
 enddef;
