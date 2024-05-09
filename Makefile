@@ -4,4 +4,4 @@ all:
 	./mylexer < example.la
 
 clean:
-	rm -rf mylexer lex.yy.c
+	rm -rf mylexer lex.yy.c ; clear
