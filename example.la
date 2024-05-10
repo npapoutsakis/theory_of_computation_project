@@ -4,5 +4,5 @@
 
 def main():
     int Distance_02 = 1;
-    writeStr(message);  
+    writeStr(message);
 enddef;
