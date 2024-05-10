@@ -1,8 +1,13 @@
 --My first Lambda program. File: myprog.la
+-- test comment
 
 @defmacro message = "Hello world!\n"
 
 def main():
-    int Distance_02 = 1;
+    int Distance_02 = 10;
+    str name = "\n";
+    0   42   123350  3   10001
+    -42.4   4.2e1   0.420E+2  42000.0e-3
+    -0.0e1
     writeStr(message);
 enddef;

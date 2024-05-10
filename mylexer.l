@@ -1,4 +1,6 @@
-/* lexer file */
+/* Computation Theory Project 2024  */
+/*      Nikolaos Papoutsakis        */
+/*           2019030206             */
 
 /* Below code is copied to lex.yy.c directly */
 %{
@@ -8,11 +10,16 @@
 %}
 
 /*definitions*/
-
-IDENTIFIER [a-zA-Z_][0-9a-zA-Z_]*
+IDENTIFIER [a-zA-Z][0-9a-zA-Z_]*
 DIGIT [0-9]
-SYMBOL  [-+*/:_$%!#@&~^()]*
+INTEGER_CONSTANT {DIGIT}{DIGIT}*
+FLOAT_CONSTANT ([+-]?{DIGIT}+\.{DIGIT}+([Ee][+-]?{DIGIT}+)?)
 
+CONST_STRING \"[^\n]*\"
+LINE_COMMENT "--"[^\n]*
+NEW_LINE \n
+
+/*rules*/
 %%
 
 "integer"   {printf("Token KEYWORD_INTEGER: %s\n", yytext); }
@@ -44,21 +51,30 @@ SYMBOL  [-+*/:_$%!#@&~^()]*
 "of"        {printf("Token KEYWORD_OF: %s\n", yytext); }
 
 
-{IDENTIFIER} {printf("Token INDENTIFIER: %s\n", yytext);}
-{DIGIT}      {printf("Token DIGIT: %s\n", yytext);}
+{IDENTIFIER}    {printf("Token INDENTIFIER: %s\n", yytext);}
+{DIGIT}         {printf("Token DIGIT: %s\n", yytext);}
+{INTEGER_CONSTANT} {printf("Token INTEGER_CONSTANT: %s\n", yytext);}
+{FLOAT_CONSTANT}   {printf("Token FLOAT_CONSTANT: %s\n", yytext);}
+
+
+{CONST_STRING}  {printf("Token CONST_STRING: %s\n", yytext);}
+{LINE_COMMENT}  {/*Skip line until you find \n character*/}
+{NEW_LINE}      {lineCount++;}
 
 
 ";" {printf("Token SEMICOLON: %s\n", yytext);}
 
+[ ]
 
-"--"[^\n]*  {/*Skip comments*/}
+. { 
+    /*If unrecognized character appears*/
+    printError();
+}
 
-\n           ++lineCount;
-
-. { /*Skipping all other character*/ printError();}
 
 %%
+/* user code section */
 int printError(){
-    printf("Unkown character on line %d -> %s\n", lineCount, yytext);
+    printf("Unknown character on line %d: %s\n", lineCount, yytext);
     return -1;
 }
