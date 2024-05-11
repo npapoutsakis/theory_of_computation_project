@@ -20,6 +20,8 @@ LINE_COMMENT "--"[^\n]*
 NEW_LINE \n
 WHITE_SPACE [ \t\r]
 
+%x defmacro
+
 /*rules*/
 %%
 
