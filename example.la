@@ -1,7 +1,7 @@
 --My first Lambda program. File: myprog.la
 -- test comment
 
-@defmacro message = "Hello world!\n"
+@defmacro message "Hello world!\n"
 
 def main():
     integer Distance_02 = 10;

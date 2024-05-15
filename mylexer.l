@@ -6,6 +6,7 @@
 %{
     #include <stdio.h>
     #include "cgen.h"
+    
     int printError();
     int lineCount = 1;
 %}
@@ -96,6 +97,13 @@ WHITE_SPACE [ \t\r]
 
 "#"                  {printf("Token MEMBER_VARIABLE_OP:%s\n", yytext);}
 "->"                 {printf("Token FUNCTION_RETURN_OP: %s\n", yytext);}
+
+"@defmacro"                      {BEGIN(defmacro);}
+<defmacro>{WHITE_SPACE}          {/* Do nothing*/}
+<defmacro>{IDENTIFIER}           {printf("Token INDENTIFIER: %s\n", yytext);}
+<defmacro>{CONST_STRING}         {printf("Token CONST_STRING: %s\n", yytext);}
+<defmacro>{NEW_LINE}             {BEGIN(INITIAL);}
+
 
 . { 
     /*If unrecognized character appears*/
