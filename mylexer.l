@@ -9,12 +9,16 @@
     
     int printError();
     int lineCount = 1;
+
+    char *defmacro_value = NULL;
+    char *defmacro_id = NULL;
+    
 %}
 
 /*definitions*/
 DIGIT [0-9]
 IDENTIFIER [a-zA-Z][0-9a-zA-Z_]*
-INTEGER_CONSTANT {DIGIT}{DIGIT}*
+INTEGER_CONSTANT [+-]?{DIGIT}{DIGIT}*
 FLOAT_CONSTANT ([+-]?{DIGIT}+\.{DIGIT}+([Ee][+-]?{DIGIT}+)?)
 CONST_STRING \"[^\n]*\"
 LINE_COMMENT "--"[^\n]*
@@ -55,7 +59,18 @@ WHITE_SPACE [ \t\r]
 "of"                 {printf("Token KEYWORD_OF: %s\n", yytext); }
 
 
-{IDENTIFIER}         {printf("Token INDENTIFIER: %s\n", yytext);}
+{IDENTIFIER}         {
+    /* check if the macro is appearing inside code*/
+    if(!strcmp(yytext, defmacro_id)) {
+        printf("Token CONST_STRING: %s\n", defmacro_value);
+        free(defmacro_id);
+        free(defmacro_value);
+    }else {
+        printf("Token IDENTIFIER: %s\n", yytext);
+    }
+
+}
+
 {INTEGER_CONSTANT}   {printf("Token INTEGER_CONSTANT: %s\n", yytext);}
 {FLOAT_CONSTANT}     {printf("Token FLOAT_CONSTANT: %s\n", yytext);}
 {CONST_STRING}       {printf("Token CONST_STRING: %s\n", yytext);}
@@ -86,7 +101,7 @@ WHITE_SPACE [ \t\r]
 "%="                 {printf("Token ASSIGNMENT_OP_MOD_ASSIGN: %s\n", yytext);}
 ":="                 {printf("Token ASSIGNMENT_OP_COLON_ASSIGN: %s\n", yytext);}
 
-";"                  {printf("Token SEMICOLON: %s\n", yytext);}
+";"                  {printf("Token SEMICOLON on line %d: %s\n", lineCount, yytext);}
 "("                  {printf("Token LEFT_PARENTHESIS: %s\n", yytext);}
 ")"                  {printf("Token RIGHT_PARENTHESIS: %s\n", yytext);}
 ","                  {printf("Token COMMA: %s\n", yytext);}
@@ -100,12 +115,12 @@ WHITE_SPACE [ \t\r]
 
 "@defmacro"                      {BEGIN(defmacro);}
 <defmacro>{WHITE_SPACE}          {/* Do nothing*/}
-<defmacro>{IDENTIFIER}           {printf("Token INDENTIFIER: %s\n", yytext);}
-<defmacro>{CONST_STRING}         {printf("Token CONST_STRING: %s\n", yytext);}
-<defmacro>{NEW_LINE}             {BEGIN(INITIAL);}
+<defmacro>{IDENTIFIER}           {defmacro_id = strdup(yytext);}
+<defmacro>{CONST_STRING}         {defmacro_value = strdup(yytext);}
+<defmacro>{NEW_LINE}             {lineCount++; BEGIN(INITIAL);}
 
 
-. { 
+. {
     /*If unrecognized character appears*/
     printError();
 }
