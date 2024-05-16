@@ -1,55 +1,21 @@
-limit, num, counter: integer;
+-- My first Lambda program. File: myprog.la
 
-def prime(n: integer)-> bool: 
-   i: integer; 
-   result, isPrime: bool;
-      
-  if (n < 0): 
-    result = prime(-n);
-  else: 
-    if (n < 2): 
-      result = False;    
-    else: 
-      if (n == 2): 
-        result = True;
-      else: 
-        if (n % 2 == 0):
-          result = False;
-        else:  
-          i = 3;
-          isPrime = True;
-          while (isPrime and (i < n / 2) ): 
-            isPrime = n % i != 0;
-            i = i + 2;
-          endwhile;
-          result = isPrime;
-        endif;
-      endif;
-    endif;
-  endif;
-   
-  return result;
-enddef;
+@defmacro message "Hello world!"
+@defmacro test0 "Nikos"
+@defmacro test1 "Maria"
+@defmacro test2 "Lilygi"
+@defmacro test3 "LilArgy"
 
-def main(): 
+@defmacro mymacro "gamaw kai dernw"
 
-  limit = readInteger();  
+@defmacro test3 "testingOverride"
 
-  -- 2 is prime
-  writeInteger(2);
-  writeStr(" "); 
+def main():
+  writeStr(message);
+  writeStr(test0);
+  writeStr(test1);
+  writeStr(test2);
+  writeStr(test3);
 
-  counter = 1; -- count the prime numbers found
-  -- check only odd numbers for primality  
-  for num in [3: limit+1: 2]:  
-    if (prime(num)):  
-      counter = counter + 1;
-      writeInteger(num);
-      writeStr(" ");
-    endif;      
-  endfor;
-  
-   writeStr("\nThe total number of primes found is:");
-   writeInteger(counter);
-   writeStr("\n");   
+  writeStr(mymacro);
 enddef;

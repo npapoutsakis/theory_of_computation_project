@@ -10,9 +10,9 @@
     int printError();
     int lineCount = 1;
 
-    char *defmacro_value = NULL;
-    char *defmacro_id = NULL;
-    
+    int macro_counter = 0;
+    char **defmacro_values = NULL, **defmacro_ids = NULL;
+
 %}
 
 /*definitions*/
@@ -60,13 +60,17 @@ WHITE_SPACE [ \t\r]
 
 
 {IDENTIFIER}         {
-    /* check if the macro is appearing inside code*/
-    if(defmacro_id != NULL && !strcmp(yytext, defmacro_id)) {
-        printf("Line %d\t Token CONST_STRING: %s\n", lineCount, defmacro_value);
-        free(defmacro_id);
-        free(defmacro_value);
+    int isMacro = 0;
+    /* need to check macros */
+    for(int i = macro_counter - 1; i >= 0; i--){
+        if(!strcmp(yytext, defmacro_ids[i])){
+            printf("Line %d\t Token CONST_STRING: %s\n", lineCount, defmacro_values[i]);
+            isMacro = 1;
+            break;
+        }
     }
-    else 
+
+    if(!isMacro)
         printf("Line %d\t Token IDENTIFIER: %s\n", lineCount, yytext);
 }
 
@@ -114,8 +118,29 @@ WHITE_SPACE [ \t\r]
 
 "@defmacro"                      {BEGIN(defmacro);}
 <defmacro>{WHITE_SPACE}          {/* Do nothing*/}
-<defmacro>{IDENTIFIER}           {defmacro_id = strdup(yytext);}
-<defmacro>{CONST_STRING}         {defmacro_value = strdup(yytext);}
+<defmacro>{IDENTIFIER}           {
+
+    /* here we create space for our macros*/
+    macro_counter += 1;
+
+    char **temp = (char **)realloc(defmacro_ids, macro_counter * sizeof(char *));
+    
+    defmacro_ids = temp;
+
+    /* assign to 0 element first */
+    defmacro_ids[macro_counter - 1] = strdup(yytext);
+}
+
+<defmacro>{CONST_STRING}         {
+
+    char **temp = (char **)realloc(defmacro_values, macro_counter * sizeof(char *));
+    
+    defmacro_values = temp;
+
+    /* assign to 0 element first */
+    defmacro_values[macro_counter - 1] = strdup(yytext);
+}
+
 <defmacro>{NEW_LINE}             {lineCount++; BEGIN(INITIAL);}
 
 
