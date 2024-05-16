@@ -1,7 +1,7 @@
 -- My first Lambda program. File: myprog.la
 
 @defmacro message "Hello world!"
-@defmacro test0 "Nikos"
+@defmacro test0 -10.3
 @defmacro test1 "Maria"
 @defmacro test2 "Lilygi"
 @defmacro test3 "LilArgy"

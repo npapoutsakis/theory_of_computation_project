@@ -5,12 +5,14 @@
 /* Below code is copied to lex.yy.c directly */
 %{
     #include <stdio.h>
+    #include <stdlib.h>
     #include "cgen.h"
     
     int printError();
-    int lineCount = 1;
+    void saveMacro(char ***);
+    void freeMacrosList(char ***, char ***);
+    int lineCount = 1, macro_counter = 0;
 
-    int macro_counter = 0;
     char **defmacro_values = NULL, **defmacro_ids = NULL;
 
 %}
@@ -116,32 +118,13 @@ WHITE_SPACE [ \t\r]
 "#"                  {printf("Line %d\t Token MEMBER_VARIABLE_OP: %s\n", lineCount, yytext);}
 "->"                 {printf("Line %d\t Token FUNCTION_RETURN_OP: %s\n", lineCount, yytext);}
 
-"@defmacro"                      {BEGIN(defmacro);}
-<defmacro>{WHITE_SPACE}          {/* Do nothing*/}
-<defmacro>{IDENTIFIER}           {
 
-    /* here we create space for our macros*/
-    macro_counter += 1;
-
-    char **temp = (char **)realloc(defmacro_ids, macro_counter * sizeof(char *));
-    
-    defmacro_ids = temp;
-
-    /* assign to 0 element first */
-    defmacro_ids[macro_counter - 1] = strdup(yytext);
-}
-
-<defmacro>{CONST_STRING}         {
-
-    char **temp = (char **)realloc(defmacro_values, macro_counter * sizeof(char *));
-    
-    defmacro_values = temp;
-
-    /* assign to 0 element first */
-    defmacro_values[macro_counter - 1] = strdup(yytext);
-}
-
-<defmacro>{NEW_LINE}             {lineCount++; BEGIN(INITIAL);}
+"@defmacro"                                      { macro_counter++; BEGIN(defmacro); }
+<defmacro>{WHITE_SPACE}                          { /* Do nothing*/ }
+<defmacro>{IDENTIFIER}                           { saveMacro(&defmacro_ids); }
+<defmacro>{CONST_STRING}                         { saveMacro(&defmacro_values); }
+<defmacro>{INTEGER_CONSTANT}|{FLOAT_CONSTANT}    { saveMacro(&defmacro_values); }
+<defmacro>{NEW_LINE}                             { lineCount++; BEGIN(INITIAL); }
 
 
 . {
@@ -155,4 +138,26 @@ WHITE_SPACE [ \t\r]
 int printError(){
     printf("Unknown character on line %d: %s\n", lineCount, yytext);
     return -1;
+}
+
+/* calling saveMacro with by reference parameters*/
+void saveMacro(char ***macros){
+    char **temp = (char **)realloc(*macros,  macro_counter * sizeof(char *));
+
+    *macros = temp;
+
+    /* assign to 0 element first */
+    (*macros)[macro_counter - 1] = strdup(yytext);
+    return; 
+}
+
+/* free occupied space*/
+void freeMacrosList(char ***ids, char ***values){
+
+    // need to free each macro when EOF
+    // in progress
+    free(*ids);
+    free(*values);
+    
+    return;
 }
