@@ -11,10 +11,9 @@
     int printError();
     void saveMacro(char ***);
     void freeMacrosList(char ***, char ***);
+    void printMacros();
     int lineCount = 1, macro_counter = 0;
-
     char **defmacro_values = NULL, **defmacro_ids = NULL;
-
 %}
 
 /*definitions*/
@@ -53,7 +52,7 @@ WHITE_SPACE [ \t\r]
 "and"                {printf("Line %d\t Token KEYWORD_AND: %s\n", lineCount, yytext); }
 "or"                 {printf("Line %d\t Token KEYWORD_OR: %s\n", lineCount, yytext); }
 "def"                {printf("Line %d\t Token KEYWORD_DEF: %s\n", lineCount, yytext); }
-"enddef"             {printf("Line %d\t Token KEYWORD_ENDDEF: %s\n", lineCount, yytext); }
+"enddef"             {printf("Line %d\t Token KEYWORD_ENDDEF: %s\n", lineCount, yytext); freeMacrosList(&defmacro_ids, &defmacro_values);}
 "main"               {printf("Line %d\t Token KEYWORD_BEGIN: %s\n", lineCount, yytext); }
 "return"             {printf("Line %d\t Token KEYWORD_RETURN: %s\n", lineCount, yytext); }
 "comp"               {printf("Line %d\t Token KEYWORD_COMP: %s\n", lineCount, yytext); }
@@ -134,6 +133,12 @@ WHITE_SPACE [ \t\r]
 
 
 %%
+void printMacros(){
+    for(int i = 0; i < macro_counter-1; i++){
+        printf("Macro ID.%d: %s\t Macro Value: %s\n", i, defmacro_ids[i], defmacro_values[i]);
+    }
+}
+
 /* user code section */
 int printError(){
     printf("Unknown character on line %d: %s\n", lineCount, yytext);
@@ -148,19 +153,12 @@ void saveMacro(char ***macros){
 
     /* assign to 0 element first */
     (*macros)[macro_counter - 1] = strdup(yytext);
-    return; 
 }
 
 /* free occupied space*/
 void freeMacrosList(char ***ids, char ***values){
-
     for(int i=0; i < macro_counter; i++){
-        free(*ids[i]);
-        free(*values[i]);
+        free((*ids)[i]);
+        free((*values)[i]);
     }
-
-    free(*ids);
-    free(*values);
-    
-    return;
 }
