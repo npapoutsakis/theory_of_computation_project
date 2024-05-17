@@ -154,8 +154,11 @@ void saveMacro(char ***macros){
 /* free occupied space*/
 void freeMacrosList(char ***ids, char ***values){
 
-    // need to free each macro when EOF
-    // in progress
+    for(int i=0; i < macro_counter; i++){
+        free(*ids[i]);
+        free(*values[i]);
+    }
+
     free(*ids);
     free(*values);
     
