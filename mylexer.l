@@ -8,11 +8,13 @@
     #include <stdlib.h>
     #include "cgen.h"
     
-    int printError();
+    int error();
     void saveMacro(char ***);
     void freeMacrosList(char ***, char ***);
-    void printMacros();
+
     int lineCount = 1, macro_counter = 0;
+    
+    // for saving macros
     char **defmacro_values = NULL, **defmacro_ids = NULL;
 %}
 
@@ -52,7 +54,7 @@ WHITE_SPACE [ \t\r]
 "and"                {printf("Line %d\t Token KEYWORD_AND: %s\n", lineCount, yytext); }
 "or"                 {printf("Line %d\t Token KEYWORD_OR: %s\n", lineCount, yytext); }
 "def"                {printf("Line %d\t Token KEYWORD_DEF: %s\n", lineCount, yytext); }
-"enddef"             {printf("Line %d\t Token KEYWORD_ENDDEF: %s\n", lineCount, yytext); freeMacrosList(&defmacro_ids, &defmacro_values);printMacros();}
+"enddef"             {printf("Line %d\t Token KEYWORD_ENDDEF: %s\n", lineCount, yytext); freeMacrosList(&defmacro_ids, &defmacro_values); }
 "main"               {printf("Line %d\t Token KEYWORD_BEGIN: %s\n", lineCount, yytext); }
 "return"             {printf("Line %d\t Token KEYWORD_RETURN: %s\n", lineCount, yytext); }
 "comp"               {printf("Line %d\t Token KEYWORD_COMP: %s\n", lineCount, yytext); }
@@ -63,7 +65,7 @@ WHITE_SPACE [ \t\r]
 {IDENTIFIER}         {
     int isMacro = 0;
     /* need to check macros */
-    for(int i = macro_counter - 1; i >= 0; i--){
+    for (int i = macro_counter - 1; i >= 0; i--){
         if(!strcmp(yytext, defmacro_ids[i])){
             printf("Line %d\t Token CONST_STRING: %s\n", lineCount, defmacro_values[i]);
             isMacro = 1;
@@ -83,9 +85,9 @@ WHITE_SPACE [ \t\r]
 {NEW_LINE}           {lineCount++;}
 
 
-"+"                  {printf("Line %d\t Token ARITHMETIC_OP_PLUS: %s\n", lineCount, yytext);}
-"-"                  {printf("Line %d\t Token ARITHMETIC_OP_MINUS: %s\n", lineCount, yytext);}
-"*"                  {printf("Line %d\t Token ARITHMETIC_OP_MULT: %s\n", lineCount, yytext);}
+"+"                  {printf("Line %d\t Token ARITHMETIC_OP_PLUS: %s\n", lineCount, yytext); return '+';}
+"-"                  {printf("Line %d\t Token ARITHMETIC_OP_MINUS: %s\n", lineCount, yytext); return '-';}
+"*"                  {printf("Line %d\t Token ARITHMETIC_OP_MULT: %s\n", lineCount, yytext); return '*';}
 "/"                  {printf("Line %d\t Token ARITHMETIC_OP_DIV: %s\n", lineCount, yytext);}
 "%"                  {printf("Line %d\t Token ARITHMETIC_OP_MOD: %s\n", lineCount, yytext);}
 "**"                 {printf("Line %d\t Token ARITHMETIC_OP_POW: %s\n", lineCount, yytext);}
@@ -128,19 +130,13 @@ WHITE_SPACE [ \t\r]
 
 . {
     /*If unrecognized character appears*/
-    printError();
+    error();
 }
 
 
 %%
-void printMacros(){
-    for(int i = 0; i < macro_counter; i++){
-        printf("Macro ID.%d: %s\t Macro Value: %s\n", i, defmacro_ids[i], defmacro_values[i]);
-    }
-}
-
 /* user code section */
-int printError(){
+int error(){
     printf("Unknown character on line %d: %s\n", lineCount, yytext);
     return -1;
 }
@@ -161,4 +157,6 @@ void freeMacrosList(char ***ids, char ***values){
         free((*ids)[i]);
         free((*values)[i]);
     }
+    *ids = NULL;
+    *values = NULL;
 }
