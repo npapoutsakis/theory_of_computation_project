@@ -7,7 +7,8 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include "cgen.h"
-    
+    // #include "myanalyzer.tab.h"
+
     int error();
     void saveMacro(char ***);
     void freeMacrosList(char ***, char ***);
@@ -26,7 +27,7 @@ FLOAT_CONSTANT ([+-]?{DIGIT}+\.{DIGIT}+([Ee][+-]?{DIGIT}+)?)
 CONST_STRING \"[^\n]*\"
 LINE_COMMENT "--"[^\n]*
 NEW_LINE \n
-WHITE_SPACE [ \t\r]
+WHITE_SPACE [ \t\r]+
 
 %x defmacro
 
@@ -54,7 +55,7 @@ WHITE_SPACE [ \t\r]
 "and"                {printf("Line %d\t Token KEYWORD_AND:                 \t\t%s\n", lineCount, yytext); }
 "or"                 {printf("Line %d\t Token KEYWORD_OR:                  \t\t%s\n", lineCount, yytext); }
 "def"                {printf("Line %d\t Token KEYWORD_DEF:                 \t\t%s\n", lineCount, yytext); }
-"enddef"             {printf("Line %d\t Token KEYWORD_ENDDEF:              \t\t%s\n", lineCount, yytext); freeMacrosList(&defmacro_ids, &defmacro_values); }
+"enddef"             {printf("Line %d\t Token KEYWORD_ENDDEF:              \t\t%s\n", lineCount, yytext); }
 "main"               {printf("Line %d\t Token KEYWORD_BEGIN:               \t\t%s\n", lineCount, yytext); }
 "return"             {printf("Line %d\t Token KEYWORD_RETURN:              \t\t%s\n", lineCount, yytext); }
 "comp"               {printf("Line %d\t Token KEYWORD_COMP:                \t\t%s\n", lineCount, yytext); }
@@ -89,8 +90,8 @@ WHITE_SPACE [ \t\r]
 "+"                  {printf("Line %d\t Token ARITHMETIC_OP_PLUS:          \t\t%s\n", lineCount, yytext); return '+';}
 "-"                  {printf("Line %d\t Token ARITHMETIC_OP_MINUS:         \t\t%s\n", lineCount, yytext); return '-';}
 "*"                  {printf("Line %d\t Token ARITHMETIC_OP_MULT:          \t\t%s\n", lineCount, yytext); return '*';}
-"/"                  {printf("Line %d\t Token ARITHMETIC_OP_DIV:           \t\t%s\n", lineCount, yytext);}
-"%"                  {printf("Line %d\t Token ARITHMETIC_OP_MOD:           \t\t%s\n", lineCount, yytext);}
+"/"                  {printf("Line %d\t Token ARITHMETIC_OP_DIV:           \t\t%s\n", lineCount, yytext); return '/';}
+"%"                  {printf("Line %d\t Token ARITHMETIC_OP_MOD:           \t\t%s\n", lineCount, yytext); return '%';}
 "**"                 {printf("Line %d\t Token ARITHMETIC_OP_POW:           \t\t%s\n", lineCount, yytext);}
 
 "=="                 {printf("Line %d\t Token RELATIONAL_OP_EQUAL:         \t\t%s\n", lineCount, yytext);}
@@ -108,14 +109,14 @@ WHITE_SPACE [ \t\r]
 "%="                 {printf("Line %d\t Token ASSIGNMENT_OP_MOD_ASSIGN:   \t\t%s\n", lineCount, yytext);}
 ":="                 {printf("Line %d\t Token ASSIGNMENT_OP_COLON_ASSIGN: \t\t%s\n", lineCount, yytext);}
 
-";"                  {printf("Line %d\t Token SEMICOLON:                  \t\t%s\n", lineCount, yytext);}
-"("                  {printf("Line %d\t Token LEFT_PARENTHESIS:           \t\t%s\n", lineCount, yytext);}
-")"                  {printf("Line %d\t Token RIGHT_PARENTHESIS:          \t\t%s\n", lineCount, yytext);}
-","                  {printf("Line %d\t Token COMMA:                      \t\t%s\n", lineCount, yytext);}
-"["                  {printf("Line %d\t Token LEFT_BRACKET:               \t\t%s\n", lineCount, yytext);}
-"]"                  {printf("Line %d\t Token RIGHT_BRACKET:              \t\t%s\n", lineCount, yytext);}
-":"                  {printf("Line %d\t Token COLON:                      \t\t%s\n", lineCount, yytext);}
-"."                  {printf("Line %d\t Token DOT:                        \t\t%s\n", lineCount, yytext);}
+";"                  {printf("Line %d\t Token SEMICOLON:                  \t\t%s\n", lineCount, yytext); return ';';}
+"("                  {printf("Line %d\t Token LEFT_PARENTHESIS:           \t\t%s\n", lineCount, yytext); return '(';}
+")"                  {printf("Line %d\t Token RIGHT_PARENTHESIS:          \t\t%s\n", lineCount, yytext); return ')';}
+","                  {printf("Line %d\t Token COMMA:                      \t\t%s\n", lineCount, yytext); return ',';}
+"["                  {printf("Line %d\t Token LEFT_BRACKET:               \t\t%s\n", lineCount, yytext); return '[';}
+"]"                  {printf("Line %d\t Token RIGHT_BRACKET:              \t\t%s\n", lineCount, yytext); return ']';}
+":"                  {printf("Line %d\t Token COLON:                      \t\t%s\n", lineCount, yytext); return ':';}
+"."                  {printf("Line %d\t Token DOT:                        \t\t%s\n", lineCount, yytext); return '.';}
 
 "#"                  {printf("Line %d\t Token MEMBER_VARIABLE_OP:         \t\t%s\n", lineCount, yytext);}
 "->"                 {printf("Line %d\t Token FUNCTION_RETURN_OP:         \t\t%s\n", lineCount, yytext);}
@@ -130,6 +131,8 @@ WHITE_SPACE [ \t\r]
 <defmacro>{NEW_LINE}                             { lineCount++; BEGIN(INITIAL); }
 
 
+<<EOF>>                                          { return EOF; }
+
 . {
     /*If unrecognized character appears*/
     error();
@@ -137,7 +140,7 @@ WHITE_SPACE [ \t\r]
 
 
 %%
-/* user code section */
+/* user-defined code*/
 int error(){
     printf("Unknown character on line %d: %s\n", lineCount, yytext);
     return -1;

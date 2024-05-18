@@ -6,7 +6,7 @@
 @defmacro test2 "Lilygi"
 @defmacro test3 "LilArgy"
 
-@defmacro mymacro "gamaw kai dernw"
+@defmacro mymacro "Si Motren Piden"
 
 @defmacro test3 "testingOverride"
 
