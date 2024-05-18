@@ -52,7 +52,7 @@ WHITE_SPACE [ \t\r]
 "and"                {printf("Line %d\t Token KEYWORD_AND: %s\n", lineCount, yytext); }
 "or"                 {printf("Line %d\t Token KEYWORD_OR: %s\n", lineCount, yytext); }
 "def"                {printf("Line %d\t Token KEYWORD_DEF: %s\n", lineCount, yytext); }
-"enddef"             {printf("Line %d\t Token KEYWORD_ENDDEF: %s\n", lineCount, yytext); freeMacrosList(&defmacro_ids, &defmacro_values);}
+"enddef"             {printf("Line %d\t Token KEYWORD_ENDDEF: %s\n", lineCount, yytext); freeMacrosList(&defmacro_ids, &defmacro_values);printMacros();}
 "main"               {printf("Line %d\t Token KEYWORD_BEGIN: %s\n", lineCount, yytext); }
 "return"             {printf("Line %d\t Token KEYWORD_RETURN: %s\n", lineCount, yytext); }
 "comp"               {printf("Line %d\t Token KEYWORD_COMP: %s\n", lineCount, yytext); }
@@ -134,7 +134,7 @@ WHITE_SPACE [ \t\r]
 
 %%
 void printMacros(){
-    for(int i = 0; i < macro_counter-1; i++){
+    for(int i = 0; i < macro_counter; i++){
         printf("Macro ID.%d: %s\t Macro Value: %s\n", i, defmacro_ids[i], defmacro_values[i]);
     }
 }
