@@ -1,21 +1,2 @@
--- My first Lambda program. File: myprog.la
-
-@defmacro message "Hello world!"
-@defmacro test0 -10.3
-@defmacro test1 "Maria"
-@defmacro test2 "Lilygi"
-@defmacro test3 "LilArgy"
-
-@defmacro mymacro "Si Motren Piden"
-
-@defmacro test3 "testingOverride"
-
-def main():
-  writeStr(message);
-  writeStr(test0);
-  writeStr(test1);
-  writeStr(test2);
-  writeStr(test3);
-
-  writeStr(mymacro);
-enddef;
+1    + 2 *   4/ 5;
+1 * 2;

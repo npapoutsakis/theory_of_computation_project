@@ -7,7 +7,7 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include "cgen.h"
-    // #include "myanalyzer.tab.h"
+    #include "myanalyzer.tab.h"
 
     int error();
     void saveMacro(char ***);
@@ -34,33 +34,33 @@ WHITE_SPACE [ \t\r]+
 /*rules*/
 %%
 
-"integer"            {printf("Line %d\t Token KEYWORD_INTEGER:             \t\t%s\n", lineCount, yytext); }
-"scalar"             {printf("Line %d\t Token KEYWORD_SCALAR:              \t\t%s\n", lineCount, yytext); }
-"str"                {printf("Line %d\t Token KEYWORD_STR:                 \t\t%s\n", lineCount, yytext); }
-"bool"               {printf("Line %d\t Token KEYWORD_BOOL:                \t\t%s\n", lineCount, yytext); }
-"True"               {printf("Line %d\t Token KEYWORD_TRUE:                \t\t%s\n", lineCount, yytext); }
-"False"              {printf("Line %d\t Token KEYWORD_FALSE:               \t\t%s\n", lineCount, yytext); }
-"const"              {printf("Line %d\t Token KEYWORD_CONST:               \t\t%s\n", lineCount, yytext); }
-"if"                 {printf("Line %d\t Token KEYWORD_IF:                  \t\t%s\n", lineCount, yytext); }
-"else"               {printf("Line %d\t Token KEYWORD_ELSE:                \t\t%s\n", lineCount, yytext); }
-"endif"              {printf("Line %d\t Token KEYWORD_ENDIF:               \t\t%s\n", lineCount, yytext); }
-"for"                {printf("Line %d\t Token KEYWORD_FOR:                 \t\t%s\n", lineCount, yytext); }
-"in"                 {printf("Line %d\t Token KEYWORD_IN:                  \t\t%s\n", lineCount, yytext); }
-"endfor"             {printf("Line %d\t Token KEYWORD_ENDFOR:              \t\t%s\n", lineCount, yytext); }
-"while"              {printf("Line %d\t Token KEYWORD_WHILE:               \t\t%s\n", lineCount, yytext); }
-"endwhile"           {printf("Line %d\t Token KEYWORD_ENDWHILE:            \t\t%s\n", lineCount, yytext); }
-"break"              {printf("Line %d\t Token KEYWORD_BREAK:               \t\t%s\n", lineCount, yytext); }
-"continue"           {printf("Line %d\t Token KEYWORD_CONTINUE:            \t\t%s\n", lineCount, yytext); }
-"not"                {printf("Line %d\t Token KEYWORD_NOT:                 \t\t%s\n", lineCount, yytext); }
-"and"                {printf("Line %d\t Token KEYWORD_AND:                 \t\t%s\n", lineCount, yytext); }
-"or"                 {printf("Line %d\t Token KEYWORD_OR:                  \t\t%s\n", lineCount, yytext); }
-"def"                {printf("Line %d\t Token KEYWORD_DEF:                 \t\t%s\n", lineCount, yytext); }
-"enddef"             {printf("Line %d\t Token KEYWORD_ENDDEF:              \t\t%s\n", lineCount, yytext); }
-"main"               {printf("Line %d\t Token KEYWORD_BEGIN:               \t\t%s\n", lineCount, yytext); }
-"return"             {printf("Line %d\t Token KEYWORD_RETURN:              \t\t%s\n", lineCount, yytext); }
-"comp"               {printf("Line %d\t Token KEYWORD_COMP:                \t\t%s\n", lineCount, yytext); }
-"endcomp"            {printf("Line %d\t Token KEYWORD_ENDCOMP:             \t\t%s\n", lineCount, yytext); }
-"of"                 {printf("Line %d\t Token KEYWORD_OF:                  \t\t%s\n", lineCount, yytext); }
+"integer"            {printf("Line %d\t Token KEYWORD_INTEGER:             \t\t%s\n", lineCount, yytext); return KW_INTEGER;}
+"scalar"             {printf("Line %d\t Token KEYWORD_SCALAR:              \t\t%s\n", lineCount, yytext); return KW_SCALAR;}
+"str"                {printf("Line %d\t Token KEYWORD_STR:                 \t\t%s\n", lineCount, yytext); return KW_STR;}
+"bool"               {printf("Line %d\t Token KEYWORD_BOOL:                \t\t%s\n", lineCount, yytext); return KW_BOOL;}
+"True"               {printf("Line %d\t Token KEYWORD_TRUE:                \t\t%s\n", lineCount, yytext); return KW_TRUE;}
+"False"              {printf("Line %d\t Token KEYWORD_FALSE:               \t\t%s\n", lineCount, yytext); return KW_FALSE;}
+"const"              {printf("Line %d\t Token KEYWORD_CONST:               \t\t%s\n", lineCount, yytext); return KW_CONST;}
+"if"                 {printf("Line %d\t Token KEYWORD_IF:                  \t\t%s\n", lineCount, yytext); return KW_IF;}
+"else"               {printf("Line %d\t Token KEYWORD_ELSE:                \t\t%s\n", lineCount, yytext); return KW_ELSE;}
+"endif"              {printf("Line %d\t Token KEYWORD_ENDIF:               \t\t%s\n", lineCount, yytext); return KW_ENDIF;}
+"for"                {printf("Line %d\t Token KEYWORD_FOR:                 \t\t%s\n", lineCount, yytext); return KW_FOR;}
+"in"                 {printf("Line %d\t Token KEYWORD_IN:                  \t\t%s\n", lineCount, yytext); return KW_IN;}
+"endfor"             {printf("Line %d\t Token KEYWORD_ENDFOR:              \t\t%s\n", lineCount, yytext); return KW_ENDFOR;}
+"while"              {printf("Line %d\t Token KEYWORD_WHILE:               \t\t%s\n", lineCount, yytext); return KW_WHILE;}
+"endwhile"           {printf("Line %d\t Token KEYWORD_ENDWHILE:            \t\t%s\n", lineCount, yytext); return KW_ENDWHILE;}
+"break"              {printf("Line %d\t Token KEYWORD_BREAK:               \t\t%s\n", lineCount, yytext); return KW_BREAK;}
+"continue"           {printf("Line %d\t Token KEYWORD_CONTINUE:            \t\t%s\n", lineCount, yytext); return KW_CONTINUE;}
+"not"                {printf("Line %d\t Token KEYWORD_NOT:                 \t\t%s\n", lineCount, yytext); return KW_NOT;}
+"and"                {printf("Line %d\t Token KEYWORD_AND:                 \t\t%s\n", lineCount, yytext); return KW_AND;}
+"or"                 {printf("Line %d\t Token KEYWORD_OR:                  \t\t%s\n", lineCount, yytext); return KW_OR;}
+"def"                {printf("Line %d\t Token KEYWORD_DEF:                 \t\t%s\n", lineCount, yytext); return KW_DEF;}
+"enddef"             {printf("Line %d\t Token KEYWORD_ENDDEF:              \t\t%s\n", lineCount, yytext); return KW_ENDDEF;}
+"main"               {printf("Line %d\t Token KEYWORD_BEGIN:               \t\t%s\n", lineCount, yytext); return KW_BEGIN;}
+"return"             {printf("Line %d\t Token KEYWORD_RETURN:              \t\t%s\n", lineCount, yytext); return KW_RETURN;}
+"comp"               {printf("Line %d\t Token KEYWORD_COMP:                \t\t%s\n", lineCount, yytext); return KW_COMP;}
+"endcomp"            {printf("Line %d\t Token KEYWORD_ENDCOMP:             \t\t%s\n", lineCount, yytext); return KW_ENDCOMP;}
+"of"                 {printf("Line %d\t Token KEYWORD_OF:                  \t\t%s\n", lineCount, yytext); return KW_OF;}
 
 
 {IDENTIFIER}         {
@@ -70,18 +70,20 @@ WHITE_SPACE [ \t\r]+
         if(!strcmp(yytext, defmacro_ids[i])){
             printf("Line %d\t Token CONST_STRING:                \t\t%s\n", lineCount, defmacro_values[i]);
             isMacro = 1;
-            break;
+            return TK_STRING;
         }
     }
 
-    if(!isMacro)
+    if(!isMacro){
         printf("Line %d\t Token IDENTIFIER:                \t\t%s\n", lineCount, yytext);
+        return TK_ID;
+    }
 }
 
 
-{INTEGER_CONSTANT}   {printf("Line %d\t Token INTEGER_CONSTANT:            \t\t%s\n", lineCount, yytext);}
-{FLOAT_CONSTANT}     {printf("Line %d\t Token FLOAT_CONSTANT:              \t\t%s\n", lineCount, yytext);}
-{CONST_STRING}       {printf("Line %d\t Token CONST_STRING:                \t\t%s\n", lineCount, yytext);}
+{INTEGER_CONSTANT}   {printf("Line %d\t Token INTEGER_CONSTANT:            \t\t%s\n", lineCount, yytext); return TK_INT;}
+{FLOAT_CONSTANT}     {printf("Line %d\t Token FLOAT_CONSTANT:              \t\t%s\n", lineCount, yytext); return TK_FLOAT;}
+{CONST_STRING}       {printf("Line %d\t Token CONST_STRING:                \t\t%s\n", lineCount, yytext); return TK_STRING;}
 {LINE_COMMENT}       {/*Skip line until you find \n character*/}
 {WHITE_SPACE}        {/*Skipping white space*/}
 {NEW_LINE}           {lineCount++;}
@@ -92,22 +94,22 @@ WHITE_SPACE [ \t\r]+
 "*"                  {printf("Line %d\t Token ARITHMETIC_OP_MULT:          \t\t%s\n", lineCount, yytext); return '*';}
 "/"                  {printf("Line %d\t Token ARITHMETIC_OP_DIV:           \t\t%s\n", lineCount, yytext); return '/';}
 "%"                  {printf("Line %d\t Token ARITHMETIC_OP_MOD:           \t\t%s\n", lineCount, yytext); return '%';}
-"**"                 {printf("Line %d\t Token ARITHMETIC_OP_POW:           \t\t%s\n", lineCount, yytext);}
+"**"                 {printf("Line %d\t Token ARITHMETIC_OP_POW:           \t\t%s\n", lineCount, yytext); return FN_POW;}
 
-"=="                 {printf("Line %d\t Token RELATIONAL_OP_EQUAL:         \t\t%s\n", lineCount, yytext);}
-"!="                 {printf("Line %d\t Token RELATIONAL_OP_NOT_EQUAL:     \t\t%s\n", lineCount, yytext);}
-"<"                  {printf("Line %d\t Token RELATIONAL_OP_LESS:          \t\t%s\n", lineCount, yytext);}
-"<="                 {printf("Line %d\t Token RELATIONAL_OP_LESS_OR_EQUAL: \t\t%s\n", lineCount, yytext);}
-">"                  {printf("Line %d\t Token RELATIONAL_OP_GREATER:       \t\t%s\n", lineCount, yytext);}
-">="                 {printf("Line %d\t Token RELATIONAL_OP_GREATER_OR_EQUAL: \t\t%s\n", lineCount, yytext);}
+"=="                 {printf("Line %d\t Token RELATIONAL_OP_EQUAL:         \t\t%s\n", lineCount, yytext); return RP_EQUAL;}
+"!="                 {printf("Line %d\t Token RELATIONAL_OP_NOT_EQUAL:     \t\t%s\n", lineCount, yytext); return RP_NOT_EQUAL;}
+"<"                  {printf("Line %d\t Token RELATIONAL_OP_LESS:          \t\t%s\n", lineCount, yytext); return RP_LESS;}
+"<="                 {printf("Line %d\t Token RELATIONAL_OP_LESS_OR_EQUAL: \t\t%s\n", lineCount, yytext); return RP_LESS_EQUAL;}
+">"                  {printf("Line %d\t Token RELATIONAL_OP_GREATER:       \t\t%s\n", lineCount, yytext); return RP_GREATER;}
+">="                 {printf("Line %d\t Token RELATIONAL_OP_GREATER_OR_EQUAL: \t\t%s\n", lineCount, yytext); return RP_GREARER_EQUAL;}
 
-"="                  {printf("Line %d\t Token ASSIGNMENT_OP_ASSIGN:       \t\t%s\n", lineCount, yytext);}
-"+="                 {printf("Line %d\t Token ASSIGNMENT_OP_ADD_ASSIGN:   \t\t%s\n", lineCount, yytext);}
-"-="                 {printf("Line %d\t Token ASSIGNMENT_OP_SUB_ASSIGN:   \t\t%s\n", lineCount, yytext);}
-"*="                 {printf("Line %d\t Token ASSIGNMENT_OP_MULT_ASSIGN:  \t\t%s\n", lineCount, yytext);}
-"/="                 {printf("Line %d\t Token ASSIGNMENT_OP_DIV_ASSIGN:   \t\t%s\n", lineCount, yytext);}
-"%="                 {printf("Line %d\t Token ASSIGNMENT_OP_MOD_ASSIGN:   \t\t%s\n", lineCount, yytext);}
-":="                 {printf("Line %d\t Token ASSIGNMENT_OP_COLON_ASSIGN: \t\t%s\n", lineCount, yytext);}
+"="                  {printf("Line %d\t Token ASSIGNMENT_OP_ASSIGN:       \t\t%s\n", lineCount, yytext); return ASSIGN;}
+"+="                 {printf("Line %d\t Token ASSIGNMENT_OP_ADD_ASSIGN:   \t\t%s\n", lineCount, yytext); return SELF_ADD;}
+"-="                 {printf("Line %d\t Token ASSIGNMENT_OP_SUB_ASSIGN:   \t\t%s\n", lineCount, yytext); return SELF_SUB;}
+"*="                 {printf("Line %d\t Token ASSIGNMENT_OP_MULT_ASSIGN:  \t\t%s\n", lineCount, yytext); return SELF_MULT;}
+"/="                 {printf("Line %d\t Token ASSIGNMENT_OP_DIV_ASSIGN:   \t\t%s\n", lineCount, yytext); return SELF_DIV;}
+"%="                 {printf("Line %d\t Token ASSIGNMENT_OP_MOD_ASSIGN:   \t\t%s\n", lineCount, yytext); return SELF_MOD;}
+":="                 {printf("Line %d\t Token ASSIGNMENT_OP_COLON_ASSIGN: \t\t%s\n", lineCount, yytext); return SELF_CLN_ASSIGN;}
 
 ";"                  {printf("Line %d\t Token SEMICOLON:                  \t\t%s\n", lineCount, yytext); return ';';}
 "("                  {printf("Line %d\t Token LEFT_PARENTHESIS:           \t\t%s\n", lineCount, yytext); return '(';}
@@ -118,8 +120,8 @@ WHITE_SPACE [ \t\r]+
 ":"                  {printf("Line %d\t Token COLON:                      \t\t%s\n", lineCount, yytext); return ':';}
 "."                  {printf("Line %d\t Token DOT:                        \t\t%s\n", lineCount, yytext); return '.';}
 
-"#"                  {printf("Line %d\t Token MEMBER_VARIABLE_OP:         \t\t%s\n", lineCount, yytext);}
-"->"                 {printf("Line %d\t Token FUNCTION_RETURN_OP:         \t\t%s\n", lineCount, yytext);}
+"#"                  {printf("Line %d\t Token MEMBER_VARIABLE_OP:         \t\t%s\n", lineCount, yytext); return '#';}
+"->"                 {printf("Line %d\t Token FUNCTION_RETURN_OP:         \t\t%s\n", lineCount, yytext); return FN_RETURN;}
 
 
 
