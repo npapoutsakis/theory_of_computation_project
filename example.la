@@ -1,2 +1,7 @@
-1    + 2 *   4/ 5;
-1 * 2;
+-- Testing a comment!
+
+def main():
+    x: integer;
+    x = 1 + 3 + 5;
+    writeInt(x);
+enddef;
