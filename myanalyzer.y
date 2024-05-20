@@ -85,7 +85,6 @@
 
 program:
     c_file_translation { 
-        $$ = template("%s", $1);
         
         FILE* fp = fopen("c_file.c", "w");
         
@@ -98,6 +97,7 @@ program:
         fputs("#include <math.h>\n", fp);
         fputs(c_prologue, fp);         
 
+        $$ = template("%s", $1);
         // here add the rest of the code
 
         fclose(fp);
