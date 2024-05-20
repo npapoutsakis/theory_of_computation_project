@@ -14,5 +14,5 @@ bison:
 	./mycompiler < example.la
 
 clean:
-	rm -rf mylexer mycompiler lex.yy.c myanalyzer.tab.c myanalyzer.tab.h myanalyzer.output
+	rm -rf mylexer mycompiler lex.yy.c myanalyzer.tab.c myanalyzer.tab.h myanalyzer.output c_file.c
 	clear
