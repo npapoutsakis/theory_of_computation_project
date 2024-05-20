@@ -6,11 +6,11 @@
     #include <stdio.h>
     #include <math.h>
     #include "lambdalib.h"
+    #include "cgen.h"
 
     extern int yylex(void);
-    void yyerror(const char *s);
 
-    int line_num;
+    int line_num = 1;
 %}
 
 %union{
@@ -48,13 +48,13 @@
 %token KW_ENDCOMP
 %token KW_OF
 
-/* Regular Expressions */
-%token TK_ID
-%token <value> TK_INT
-%token <value> TK_FLOAT
-%token TK_STRING
 
-%token FN_RETURN
+/* Regular Expressions */
+%token <string> TK_ID
+%token <string> TK_INT
+%token <string> TK_FLOAT
+%token <string> TK_STRING
+
 
 /* Symbols with priorities*/
 %right ASSIGN SELF_ADD SELF_SUB SELF_MULT SELF_DIV SELF_MOD SELF_CLN_ASSIGN
@@ -68,29 +68,44 @@
 %right FN_POW
 %left '.' '(' ')' '[' ']'
 
+%token ';'
+%token FN_RETURN
+%token '#'
+%token ':'
+%token ','
 
 
-%type <value> expr
+%start program
 
+%type <string> program
+%type <string> c_file_translation
 
 %%
 /* grammar expressions */
 
-expr:
-    TK_FLOAT
-|    TK_INT
-|   expr '+' expr {$$ = $1 + $3;}
-|   expr '-' expr {$$ = $1 - $3;}
-|   expr '*' expr {$$ = $1 * $3;}
-|   expr '/' expr {$$ = $1 / $3;}
+program:
+    c_file_translation { 
+        $$ = template("%s", $1);
+        
+        FILE* fp = fopen("c_file.c", "w");
+        
+        fputs("/* Computation Theory Project 2024  */\n", fp);
+        fputs("/*      Nikolaos Papoutsakis        */\n", fp);
+        fputs("/*           2019030206             */\n", fp);
+        
+        fputs("\n#include <stdio.h>\n", fp);
+        fputs("#include <stdlib.h>\n", fp);
+        fputs("#include <math.h>\n", fp);
+        fputs(c_prologue, fp);         
+
+        // here add the rest of the code
+
+        fclose(fp);
+    }
 ;
 
-
-
-
-
-
-
+c_file_translation:
+;
 
 
 
@@ -105,9 +120,9 @@ expr:
 %%
 int main(){
     if( yyparse() == 0 ){
-        printf("\x1b[31m""Rejected!\n""\x1b[0m");
+        printf("\x1b[32m""Accepted!\n""\x1b[0m");
         return -1;
     }
 
-    printf("\x1b[32m""Accepted!\n""\x1b[0m");
+    printf("\x1b[31m""Rejected!\n""\x1b[0m");
 }
