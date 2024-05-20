@@ -1,7 +1,35 @@
--- Testing a comment!
+-- Test comment
+
+@defmacro name "Nikos"
+
+comp Circle:
+    #x, #y: scalar;
+    #radius: integer;
+
+    def area() -> scalar: return 3.14 * (#radius ** 2); enddef;
+    def perimeter() -> scalar: return 2 * 3.14 * #radius; enddef;
+
+endcomp;
+
+i, j: integer;
+
+array_test[10]: scalar;
+
+test: bool;
+
+const pi = 3.14152: scalar;
+
+def f1(b: integer, e: integer) -> integer:
+    return b ** e;
+enddef;
+
+def f3():
+    return;
+enddef;
 
 def main():
     x: integer;
-    x = 1 + 3 + 5;
+    x = 1 + 2 + 3 + 4;
     writeInt(x);
+    writeStr(name);
 enddef;

@@ -15,7 +15,6 @@
 
 %union{
     char *string;
-    double value;
 }
 
 
@@ -78,33 +77,34 @@
 %start program
 
 %type <string> program
-%type <string> c_file_translation
+%type <string> program_body
+%type <string> main_fn_body
+%type <string> args
 
 %%
+
 /* grammar expressions */
-
 program:
-    c_file_translation { 
-        
-        FILE* fp = fopen("c_file.c", "w");
-        
-        fputs("/* Computation Theory Project 2024  */\n", fp);
-        fputs("/*      Nikolaos Papoutsakis        */\n", fp);
-        fputs("/*           2019030206             */\n", fp);
-        
-        fputs("\n#include <stdio.h>\n", fp);
-        fputs("#include <stdlib.h>\n", fp);
-        fputs("#include <math.h>\n", fp);
-        fputs(c_prologue, fp);         
+    program_body {  FILE* fp = fopen("c_file.c", "w");
+                    
+                    fputs("/* Computation Theory Project 2024  */\n", fp);
+                    fputs("/*      Nikolaos Papoutsakis        */\n", fp);
+                    fputs("/*           2019030206             */\n", fp);
+                    
+                    fputs("\n#include <stdio.h>\n", fp);
+                    fputs("#include <stdlib.h>\n", fp);
+                    fputs("#include <math.h>\n", fp);
+                    fputs(c_prologue, fp);         
 
-        $$ = template("%s", $1);
-        // here add the rest of the code
-
-        fclose(fp);
-    }
+                    $$ = template("%s", $1);
+                    // here add the rest of the code
+                    fprintf(fp, "%s", $1);
+                    fclose(fp);
+                }   
 ;
 
-c_file_translation:
+program_body:
+    TK_ID '(' TK_STRING ')' ';' {$$ = template("%s(%s);\n", $1, $3);}
 ;
 
 
@@ -118,8 +118,8 @@ c_file_translation:
 
 
 %%
-int main(){
-    if( yyparse() == 0 ){
+int main() {
+    if(!yyparse()){
         printf("\x1b[32m""Accepted!\n""\x1b[0m");
         return -1;
     }

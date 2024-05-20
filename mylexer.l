@@ -68,6 +68,7 @@ WHITE_SPACE [ \t\r]+
     /* need to check macros */
     for (int i = macro_counter - 1; i >= 0; i--){
         if(!strcmp(yytext, defmacro_ids[i])){
+            yylval.string = strdup(defmacro_values[i]);
             printf("Line %d\t Token CONST_STRING:                \t\t%s\n", lineCount, defmacro_values[i]);
             isMacro = 1;
             return TK_STRING;
@@ -75,15 +76,16 @@ WHITE_SPACE [ \t\r]+
     }
 
     if(!isMacro){
+        yylval.string = strdup(yytext);
         printf("Line %d\t Token IDENTIFIER:                \t\t%s\n", lineCount, yytext);
         return TK_ID;
     }
 }
 
 
-{INTEGER_CONSTANT}   {printf("Line %d\t Token INTEGER_CONSTANT:            \t\t%s\n", lineCount, yytext); return TK_INT;}
-{FLOAT_CONSTANT}     {printf("Line %d\t Token FLOAT_CONSTANT:              \t\t%s\n", lineCount, yytext); return TK_FLOAT;}
-{CONST_STRING}       {printf("Line %d\t Token CONST_STRING:                \t\t%s\n", lineCount, yytext); return TK_STRING;}
+{INTEGER_CONSTANT}   { yylval.string = strdup(yytext); printf("Line %d\t Token INTEGER_CONSTANT:            \t\t%s\n", lineCount, yytext); return TK_INT;}
+{FLOAT_CONSTANT}     { yylval.string = strdup(yytext); printf("Line %d\t Token FLOAT_CONSTANT:              \t\t%s\n", lineCount, yytext); return TK_FLOAT;}
+{CONST_STRING}       { yylval.string = strdup(yytext); printf("Line %d\t Token CONST_STRING:                \t\t%s\n", lineCount, yytext); return TK_STRING;}
 {LINE_COMMENT}       {/*Skip line until you find \n character*/}
 {WHITE_SPACE}        {/*Skipping white space*/}
 {NEW_LINE}           {lineCount++;}
