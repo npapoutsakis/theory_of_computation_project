@@ -135,7 +135,7 @@ WHITE_SPACE [ \t\r]+
 <defmacro>{NEW_LINE}                             { lineCount++; BEGIN(INITIAL); }
 
 
-<<EOF>>                                          { return EOF; }
+<<EOF>>                                          { freeMacrosList(&defmacro_ids, &defmacro_values); return EOF; }
 
 . {
     /*If unrecognized character appears*/

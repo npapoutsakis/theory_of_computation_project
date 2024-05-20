@@ -3,21 +3,28 @@
 @defmacro name "Nikos"
 
 comp Circle:
+    #r[10]: scalar;
     #x, #y: scalar;
     #radius: integer;
-
-    def area() -> scalar: return 3.14 * (#radius ** 2); enddef;
-    def perimeter() -> scalar: return 2 * 3.14 * #radius; enddef;
+    
+    def area() -> scalar: 
+        return 3.14 * (#radius ** 2); 
+    enddef;
+    
+    def perimeter() -> scalar: 
+        return 2 * 3.14 * #radius; 
+    enddef;
 
 endcomp;
 
 i, j: integer;
-
-array_test[10]: scalar;
-
 test: bool;
-
+array_test[10]: scalar;
 const pi = 3.14152: scalar;
+
+new_circle: Circle;
+
+
 
 def f1(b: integer, e: integer) -> integer:
     return b ** e;
@@ -26,6 +33,8 @@ enddef;
 def f3():
     return;
 enddef;
+
+
 
 def main():
     x: integer;

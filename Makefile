@@ -1,6 +1,6 @@
 
-# default:
-	# @echo "No default action. Try 'make flex' or 'make bison'"
+default:
+	@echo "No default action. Try 'make flex' or 'make bison'"
 
 bison:
 	bison -d -v -r all myanalyzer.y

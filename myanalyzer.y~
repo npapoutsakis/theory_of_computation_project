@@ -78,11 +78,15 @@
 %type <string> program
 %type <string> program_body
 
-/* %type <string> main_function */
+%type <string> main_function
 %type <string> comp_declaration
 %type <string> comp_body
 %type <string> comp_variables_declaration
 %type <string> comp_function_declaration
+
+%type <string> const_declaration
+%type <string> variable_declaration
+%type <string> multiple_line_declaration
 
 
 %%
