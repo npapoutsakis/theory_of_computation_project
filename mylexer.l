@@ -23,7 +23,7 @@
 DIGIT [0-9]
 IDENTIFIER [a-zA-Z][0-9a-zA-Z_]*
 INTEGER_CONSTANT [+-]?{DIGIT}{DIGIT}*
-FLOAT_CONSTANT ([+-]?{DIGIT}+\.{DIGIT}+([Ee][+-]?{DIGIT}+)?)
+DOUBLE_CONSTANT ([+-]?{DIGIT}+\.{DIGIT}+([Ee][+-]?{DIGIT}+)?)
 CONST_STRING \"[^\n]*\"
 LINE_COMMENT "--"[^\n]*
 NEW_LINE \n
@@ -84,7 +84,7 @@ WHITE_SPACE [ \t\r]+
 
 
 {INTEGER_CONSTANT}   { yylval.string = strdup(yytext); printf("Line %d\t Token INTEGER_CONSTANT:            \t\t%s\n", lineCount, yytext); return TK_INT;}
-{FLOAT_CONSTANT}     { yylval.string = strdup(yytext); printf("Line %d\t Token FLOAT_CONSTANT:              \t\t%s\n", lineCount, yytext); return TK_FLOAT;}
+{DOUBLE_CONSTANT}     { yylval.string = strdup(yytext); printf("Line %d\t Token DOUBLE_CONSTANT:            \t\t%s\n", lineCount, yytext); return TK_DOUBLE;}
 {CONST_STRING}       { yylval.string = strdup(yytext); printf("Line %d\t Token CONST_STRING:                \t\t%s\n", lineCount, yytext); return TK_STRING;}
 {LINE_COMMENT}       {/*Skip line until you find \n character*/}
 {WHITE_SPACE}        {/*Skipping white space*/}
@@ -131,7 +131,7 @@ WHITE_SPACE [ \t\r]+
 <defmacro>{WHITE_SPACE}                          { /* Do nothing*/ }
 <defmacro>{IDENTIFIER}                           { saveMacro(&defmacro_ids); }
 <defmacro>{CONST_STRING}                         { saveMacro(&defmacro_values); }
-<defmacro>{INTEGER_CONSTANT}|{FLOAT_CONSTANT}    { saveMacro(&defmacro_values); }
+<defmacro>{INTEGER_CONSTANT}|{DOUBLE_CONSTANT}    { saveMacro(&defmacro_values); }
 <defmacro>{NEW_LINE}                             { lineCount++; BEGIN(INITIAL); }
 
 
