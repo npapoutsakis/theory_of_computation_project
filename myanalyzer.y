@@ -9,8 +9,7 @@
     #include "cgen.h"
 
     extern int yylex(void);
-
-    int line_num = 1;
+    int line_num;
 %}
 
 %union{
@@ -79,16 +78,28 @@
 %type <string> program_body
 
 /* %type <string> main_function */
+
 %type <string> comp_declaration
 %type <string> comp_body
+%type <string> comp_structure
 %type <string> comp_variables_declaration
-%type <string> comp_function_declaration
+/* %type <string> comp_function_declaration */
 %type <string> comp_var_list
 
+/* variable declaration */
+%type <string> variable_declaration
+%type <string> var_body
+%type <string> var_list
 %type <string> var_type
 
-%%
+%type <string> const_declaration
+%type <string> const_var_list
+%type <string> const_value
+%type <string> const_var_body
 
+%type <string> declaration
+
+%%
 /* grammar expressions */
 program:
     program_body {  FILE* fp = fopen("c_file.c", "w");
@@ -110,32 +121,90 @@ program:
                 }   
 ;
 
-
 program_body:
-/* declarations in general(comps, variables, functions, globals, consts)*/
-/* and the main function */
-    comp_declaration {$$ = $1;}
-/* simple global variable declaration */
-/* constant variables declaration */
+    program_body declaration {$$ = template("%s\n%s", $1, $2);}
+|   declaration
+;
+
+declaration:
+    variable_declaration { $$ = template("%s", $1); }
+|   const_declaration { $$ = template("%s", $1); }
+|   comp_declaration { $$ = template("%s", $1); }
 ;
 
 
 
-                    /*  All about complex type variables  */
-/* ------------------------------------------------------------------------- */
+/* Constant Variables */
+const_declaration:
+    const_var_body { $$ = template("%s", $1); }
+|   const_var_body const_declaration { $$ = template("%s\n%s", $1, $2); }
+;
+
+const_var_body:
+    KW_CONST const_var_list ':' var_type ';' { $$ = template("const %s %s;", $4, $2); }
+;
+
+const_var_list:
+    TK_ID ASSIGN const_value { $$ = template("%s = %s", $1, $3); }
+;
+
+const_value:
+    TK_DOUBLE { $$ = $1; }
+|   TK_INT { $$ = $1; }
+|   TK_STRING { $$ = $1; }
+|   KW_TRUE { $$ = "1"; }
+|   KW_FALSE { $$ = "0"; }
+;
+
+
+
+
+
+/* General Variables */
+variable_declaration:
+    var_body {$$ = template("%s", $1);}
+|   var_body variable_declaration {$$ = template("%s\n%s", $1, $2);}
+;
+
+var_body:
+    var_list ':' var_type ';' {$$ = template("%s %s;", $3, $1);}
+;
+
+var_list:
+    TK_ID {$$ = template("%s", $1);}
+|   TK_ID ',' var_list {$$ = template("%s, %s", $1, $3);}
+|   TK_ID '[' TK_INT ']' {$$ = template("%s[%s]", $1, $3);}
+|   TK_ID '[' TK_INT ']' ',' var_list {$$ = template("%s[%s], %s", $1, $3, $6);}
+;
+
+var_type:
+    KW_INTEGER {$$ = template("int");}
+|   KW_SCALAR {$$ = template("double");}
+|   KW_STR {$$ = template("char*");}
+|   KW_BOOL {$$ = template("int");}
+;
+
+
+
+
+
+
+
+
+/* Complex Variables Declaration */
 comp_declaration:
+    comp_structure   {$$=template("%s\n", $1);}
+|   comp_declaration comp_structure {$$=template("%s\n%s", $1,$2);}
+;
+
+comp_structure:
     KW_COMP TK_ID ':' comp_body KW_ENDCOMP ';' {$$ = template("typedef struct %s {\n\t%s\n} %s;", $2, $4, $2); }
 ;
 
 comp_body:
     %empty {$$ = "";}
 |   comp_variables_declaration comp_body {$$ = template("%s\n\t%s", $1, $2);}
-|   comp_function_declaration comp_body {$$ = template("%s\n\t%s", $1, $2);}
 ;
-
-comp_function_declaration:
-;
-
 
 
 comp_variables_declaration:
@@ -149,16 +218,8 @@ comp_var_list:
 |   '#' TK_ID '[' TK_INT ']' ',' comp_var_list {$$ = template("%s[%s], %s", $2, $4, $7);}
 ;
 
-/* ------------------------------------------------------------------------- */
 
 
-
-var_type:
-    KW_INTEGER {$$ = template("int");}
-|   KW_SCALAR {$$ = template("double");}
-|   KW_STR {$$ = template("char*");}
-|   KW_BOOL {$$ = template("int");}
-;
 
 
 %%
@@ -167,6 +228,5 @@ int main() {
         printf("\x1b[32m""Accepted!\n""\x1b[0m");
         return -1;
     }
-
     printf("\x1b[31m""Rejected!\n""\x1b[0m");
 }

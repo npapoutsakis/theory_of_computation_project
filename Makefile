@@ -3,7 +3,7 @@ default:
 	@echo "No default action. Try 'make flex' or 'make bison'"
 
 bison:
-	bison -d -v -r all myanalyzer.y
+	bison -d -v -r all myanalyzer.y -Wcounterexamples
 	flex mylexer.l
 	gcc -o mycompiler lex.yy.c myanalyzer.tab.c cgen.c -lfl
 	./mycompiler < example.la

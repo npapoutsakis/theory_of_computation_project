@@ -2,25 +2,21 @@
 
 @defmacro name "Nikos"
 
-i, j: integer;
-test: bool;
-array_test[10]: scalar;
-const pi = 3.14152: scalar;
+const macro = name: str;
 
+const test = 10: integer;
+comp Person:
+    #age: integer;
+    #x, #y: scalar;
+    #r[10]: bool;
+endcomp;
 
-def f1(b: integer, e: integer) -> integer:
-    return b ** e;
-enddef;
+comp Piden:
+    #age: integer;
+    #x, #y: scalar;
+endcomp;
 
-def f3():
-    return;
-enddef;
+i: integer;
+x, y: scalar;
+array_test[10]: bool;
 
-
-
-def main():
-    x: integer;
-    x = 1 + 2 + 3 + 4;
-    writeInt(x);
-    writeStr(name);
-enddef;
