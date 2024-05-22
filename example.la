@@ -1,0 +1,8 @@
+x: integer;
+y: scalar;
+q, w: bool;
+a, b, z, s,f: str;
+
+def main():
+
+enddef;
