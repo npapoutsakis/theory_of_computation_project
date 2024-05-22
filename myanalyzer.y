@@ -16,7 +16,6 @@
     char *string;
 }
 
-
 /*  Keywords */
 %token KW_INTEGER
 %token KW_SCALAR
@@ -75,149 +74,33 @@
 
 %start program
 %type <string> program
-%type <string> program_body
-
-/* %type <string> main_function */
-
-%type <string> comp_declaration
-%type <string> comp_body
-%type <string> comp_structure
-%type <string> comp_variables_declaration
-/* %type <string> comp_function_declaration */
-%type <string> comp_var_list
-
-/* variable declaration */
-%type <string> variable_declaration
-%type <string> var_body
-%type <string> var_list
-%type <string> var_type
-
-%type <string> const_declaration
-%type <string> const_var_list
-%type <string> const_value
-%type <string> const_var_body
-
-%type <string> declaration
+%type <string> c_file
 
 %%
+
 /* grammar expressions */
 program:
-    program_body {  FILE* fp = fopen("c_file.c", "w");
+    c_file { FILE* fp = fopen("c_file.c", "w");
+            fputs("/* Computation Theory Project 2024  */\n", fp);
+            fputs("/*      Nikolaos Papoutsakis        */\n", fp);
+            fputs("/*           2019030206             */\n", fp);
+            
+            fputs("\n#include <stdio.h>\n", fp);
+            fputs("#include <stdlib.h>\n", fp);
+            fputs("#include <math.h>\n", fp);
+            fputs(c_prologue, fp);         
 
-                    fputs("/* Computation Theory Project 2024  */\n", fp);
-                    fputs("/*      Nikolaos Papoutsakis        */\n", fp);
-                    fputs("/*           2019030206             */\n", fp);
-                    
-                    fputs("\n#include <stdio.h>\n", fp);
-                    fputs("#include <stdlib.h>\n", fp);
-                    fputs("#include <math.h>\n", fp);
-                    fputs(c_prologue, fp);         
+            // here add the rest of the code
+            $$ = template("%s", $1);
+            fprintf(fp, "%s", $1);
 
-                    // here add the rest of the code
-                    $$ = template("%s", $1);
-                    fprintf(fp, "%s", $1);
-
-                    fclose(fp);
-                }   
+            fclose(fp);
+        }
 ;
 
-program_body:
-    program_body declaration {$$ = template("%s\n%s", $1, $2);}
-|   declaration
-;
-
-declaration:
-    variable_declaration { $$ = template("%s", $1); }
-|   const_declaration { $$ = template("%s", $1); }
-|   comp_declaration { $$ = template("%s", $1); }
-;
-
-
-
-/* Constant Variables */
-const_declaration:
-    const_var_body { $$ = template("%s", $1); }
-|   const_var_body const_declaration { $$ = template("%s\n%s", $1, $2); }
-;
-
-const_var_body:
-    KW_CONST const_var_list ':' var_type ';' { $$ = template("const %s %s;", $4, $2); }
-;
-
-const_var_list:
-    TK_ID ASSIGN const_value { $$ = template("%s = %s", $1, $3); }
-;
-
-const_value:
-    TK_DOUBLE { $$ = $1; }
-|   TK_INT { $$ = $1; }
-|   TK_STRING { $$ = $1; }
-|   KW_TRUE { $$ = "1"; }
-|   KW_FALSE { $$ = "0"; }
-;
-
-
-
-
-
-/* General Variables */
-variable_declaration:
-    var_body {$$ = template("%s", $1);}
-|   var_body variable_declaration {$$ = template("%s\n%s", $1, $2);}
-;
-
-var_body:
-    var_list ':' var_type ';' {$$ = template("%s %s;", $3, $1);}
-;
-
-var_list:
-    TK_ID {$$ = template("%s", $1);}
-|   TK_ID ',' var_list {$$ = template("%s, %s", $1, $3);}
-|   TK_ID '[' TK_INT ']' {$$ = template("%s[%s]", $1, $3);}
-|   TK_ID '[' TK_INT ']' ',' var_list {$$ = template("%s[%s], %s", $1, $3, $6);}
-;
-
-var_type:
-    KW_INTEGER {$$ = template("int");}
-|   KW_SCALAR {$$ = template("double");}
-|   KW_STR {$$ = template("char*");}
-|   KW_BOOL {$$ = template("int");}
-;
-
-
-
-
-
-
-
-
-/* Complex Variables Declaration */
-comp_declaration:
-    comp_structure   {$$=template("%s\n", $1);}
-|   comp_declaration comp_structure {$$=template("%s\n%s", $1,$2);}
-;
-
-comp_structure:
-    KW_COMP TK_ID ':' comp_body KW_ENDCOMP ';' {$$ = template("typedef struct %s {\n\t%s\n} %s;", $2, $4, $2); }
-;
-
-comp_body:
+c_file:
     %empty {$$ = "";}
-|   comp_variables_declaration comp_body {$$ = template("%s\n\t%s", $1, $2);}
 ;
-
-
-comp_variables_declaration:
-    comp_var_list ':' var_type ';' {$$ = template("%s %s;", $3, $1);}
-;
-
-comp_var_list:
-    '#' TK_ID {$$ = template("%s", $2);}
-|   '#' TK_ID ',' comp_var_list {$$ = template("%s, %s", $2, $4);}
-|   '#' TK_ID '[' TK_INT ']' {$$ = template("%s[%s]", $2, $4);}
-|   '#' TK_ID '[' TK_INT ']' ',' comp_var_list {$$ = template("%s[%s], %s", $2, $4, $7);}
-;
-
 
 
 
