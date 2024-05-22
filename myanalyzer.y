@@ -87,6 +87,7 @@
 
 %type <string> var_declarations
 %type <string> var_identifiers
+%type <string> array_decl
 
 %%
 
@@ -163,9 +164,13 @@ var_declarations:
         else
             $$ = template("%s %s;", $3, $1);
     }
+|   array_decl ':' basic_var_types ';' {$$ = template("%s %s;", $3, $1);}
 ;
 
-
+array_decl:
+    TK_ID '[' TK_INT ']'    {$$ = template("%s[%s]", $1, $3);}
+|   array_decl ',' TK_ID '[' TK_INT ']' {$$ = template("%s, %s[%s]", $1, $3, $5);}
+;
 
 function_body:
     %empty {$$ = template("");}
