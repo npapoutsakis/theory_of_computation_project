@@ -5,6 +5,9 @@ a, b, z, s,f: str;
 x[10]: integer;
 h[5], g[8]: scalar;
 
-def main():
+const pi = 3.1415: scalar;
+const pi2 = 3: integer;
+const test = "Nikos": str;
 
+def main():
 enddef;

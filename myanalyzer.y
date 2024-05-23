@@ -87,7 +87,10 @@
 
 %type <string> var_declarations
 %type <string> var_identifiers
-%type <string> array_decl
+%type <string> array_declaration
+
+%type <string> const_declarations
+%type <string> tokens
 
 %%
 
@@ -125,34 +128,18 @@ main_function:
 
 
 
-
-/* -------------------------------------------- Data types ---------------------------------------------*/
-
-/* basic data types double, int, char *, int(boolean) */
-basic_var_types:
-    KW_SCALAR       {$$ = template("double ");}
-|   KW_INTEGER      {$$ = template("int ");}
-|   KW_STR          {$$ = template("char *");}
-|   KW_BOOL         {$$ = template("int ");}
-;
-
-/* we also have arrays and comp data types with Identifiers and variabl */
-var_identifiers:
-    TK_ID   {$$ = $1;}
-|   var_identifiers ',' TK_ID {$$ = template("%s, %s", $1, $3);}
-;
-
-
-
 /* declaration body is responsible for variable declaration (of any type) above main, that include functions and comps */
 declaration_body:
     general_declarations                  {$$ = $1;}
 |   declaration_body general_declarations {$$ = template("%s\n%s", $1, $2);}
 ;
 
+/* -------------------------------------------- Data types ---------------------------------------------*/
+
 /* Any type of declaration above main function */
 general_declarations:
     var_declarations {$$ = $1;}
+|   const_declarations
     /* add consts, comps and functions */
 ;
 
@@ -164,13 +151,54 @@ var_declarations:
         else
             $$ = template("%s %s;", $3, $1);
     }
-|   array_decl ':' basic_var_types ';' {$$ = template("%s %s;", $3, $1);}
+|   array_declaration ':' basic_var_types ';' {$$ = template("%s %s;", $3, $1);}
 ;
 
-array_decl:
-    TK_ID '[' TK_INT ']'    {$$ = template("%s[%s]", $1, $3);}
-|   array_decl ',' TK_ID '[' TK_INT ']' {$$ = template("%s, %s[%s]", $1, $3, $5);}
+/* we also have arrays and comp data types with Identifiers and variable */
+var_identifiers:
+    TK_ID   {$$ = $1;}
+|   var_identifiers ',' TK_ID {$$ = template("%s, %s", $1, $3);}
 ;
+
+array_declaration:
+    TK_ID '[' TK_INT ']'    {$$ = template("%s[%s]", $1, $3);}
+|   array_declaration ',' TK_ID '[' TK_INT ']' {$$ = template("%s, %s[%s]", $1, $3, $5);}
+;
+
+/* basic data types double, int, char *, int(boolean) */
+basic_var_types:
+    KW_SCALAR       {$$ = template("double");}
+|   KW_INTEGER      {$$ = template("int");}
+|   KW_STR          {$$ = template("char *");}
+|   KW_BOOL         {$$ = template("int");}
+;
+
+tokens:
+    TK_INT
+|   TK_DOUBLE
+|   TK_STRING
+;
+
+/* constant variable grammar rules */
+const_declarations:
+    KW_CONST var_identifiers ASSIGN tokens ':' basic_var_types ';' {$$ = template("const %s %s = %s;", $6, $2, $4);}
+;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function_body:
     %empty {$$ = template("");}
@@ -179,10 +207,9 @@ function_body:
 
 %%
 int main() {
-    if(!yyparse()){
-        printf("\x1b[32m""Accepted!\n""\x1b[0m");
-        return -1;
-    }
+    if(!yyparse())
+        printf("\x1b[32m""Accepted!\n""\x1b[0m"); return -1;
+
     printf("\x1b[31m""Rejected!\n""\x1b[0m");
 }
 
