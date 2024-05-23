@@ -251,9 +251,10 @@ function_body:
 
 %%
 int main() {
-    if(!yyparse())
-        printf("\x1b[32m""Accepted!\n""\x1b[0m"); return -1;
-
+    if(!yyparse()) {
+        printf("\x1b[32m""Accepted!\n""\x1b[0m"); 
+        return -1;
+    }
     printf("\x1b[31m""Rejected!\n""\x1b[0m");
 }
 
