@@ -81,6 +81,7 @@
 %type <string> declaration_body
 
 %type <string> function_body
+%type <string> general_var_types
 %type <string> basic_var_types
 %type <string> general_declarations
 
@@ -91,6 +92,12 @@
 
 %type <string> const_declarations
 %type <string> tokens
+
+%type <string> comp_declarations
+%type <string> comp_body
+%type <string> comp_var_declarations
+%type <string> comp_var_identifiers
+%type <string> comp_array_var_declaration
 
 %%
 
@@ -134,13 +141,20 @@ declaration_body:
 |   declaration_body general_declarations {$$ = template("%s\n%s", $1, $2);}
 ;
 
+
 /* -------------------------------------------- Data types ---------------------------------------------*/
 
 /* Any type of declaration above main function */
 general_declarations:
-    var_declarations {$$ = $1;}
+    var_declarations
 |   const_declarations
-    /* add consts, comps and functions */
+|   comp_declarations
+/* functions */
+;
+
+general_var_types:
+    basic_var_types
+|   TK_ID
 ;
 
 /* simple variables */
@@ -186,6 +200,36 @@ const_declarations:
 
 
 
+/* -------------------------------------------- Complex type declarations ---------------------------------------------*/
+comp_declarations:
+    KW_COMP TK_ID ':' comp_body KW_ENDCOMP ';' {$$ = template("\ntypedef struct %s {\n%s\n} %s;", $2, $4, $2);}
+;
+
+comp_body:
+    comp_var_declarations 
+|   comp_var_declarations comp_body {$$ = template("%s\n%s", $1, $2);}
+;
+
+comp_var_declarations:
+    comp_var_identifiers ':' general_var_types ';' {$$ = template("\t%s %s;", $3, $1);}
+|   comp_array_var_declaration ':' general_var_types ';'  {$$ = template("\t%s %s;", $3, $1);}
+;
+
+comp_var_identifiers:
+    '#' TK_ID {$$ = $2;}
+|   '#' TK_ID ',' comp_var_identifiers {$$ = template("%s, %s", $2, $4);}
+;
+
+comp_array_var_declaration:
+    '#' TK_ID '[' TK_INT ']' {$$ = template("%s[%s]", $2, $4);}
+|   comp_array_var_declaration ',' '#' TK_ID '[' TK_INT ']' {$$ = template("%s, %s[%s]", $1, $4, $6);}
+;
+
+/* to do 
+    1. comps 
+    2. functions
+    3. expressions
+ */
 
 
 

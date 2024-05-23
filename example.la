@@ -9,5 +9,14 @@ const pi = 3.1415: scalar;
 const pi2 = 3: integer;
 const test = "Nikos": str;
 
+comp Person:
+    #name: str;
+    #x[10], #a[2]: integer;
+    #y: scalar;
+    #q, #w: bool;
+endcomp;
+
+
 def main():
+
 enddef;

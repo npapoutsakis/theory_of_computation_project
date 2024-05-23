@@ -84,7 +84,7 @@ WHITE_SPACE [ \t\r]+
 
 
 {INTEGER_CONSTANT}   { yylval.string = strdup(yytext); printf("Line %d\t Token INTEGER_CONSTANT:            \t\t%s\n", lineCount, yytext); return TK_INT;}
-{DOUBLE_CONSTANT}     { yylval.string = strdup(yytext); printf("Line %d\t Token DOUBLE_CONSTANT:            \t\t%s\n", lineCount, yytext); return TK_DOUBLE;}
+{DOUBLE_CONSTANT}    { yylval.string = strdup(yytext); printf("Line %d\t Token DOUBLE_CONSTANT:            \t\t%s\n", lineCount, yytext); return TK_DOUBLE;}
 {CONST_STRING}       { yylval.string = strdup(yytext); printf("Line %d\t Token CONST_STRING:                \t\t%s\n", lineCount, yytext); return TK_STRING;}
 {LINE_COMMENT}       {/*Skip line until you find \n character*/}
 {WHITE_SPACE}        {/*Skipping white space*/}
@@ -131,7 +131,7 @@ WHITE_SPACE [ \t\r]+
 <defmacro>{WHITE_SPACE}                          { /* Do nothing*/ }
 <defmacro>{IDENTIFIER}                           { saveMacro(&defmacro_ids); }
 <defmacro>{CONST_STRING}                         { saveMacro(&defmacro_values); }
-<defmacro>{INTEGER_CONSTANT}|{DOUBLE_CONSTANT}    { saveMacro(&defmacro_values); }
+<defmacro>{INTEGER_CONSTANT}|{DOUBLE_CONSTANT}   { saveMacro(&defmacro_values); }
 <defmacro>{NEW_LINE}                             { lineCount++; BEGIN(INITIAL); }
 
 
