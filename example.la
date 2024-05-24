@@ -1,39 +1,16 @@
-@defmacro number 5
+comp Address:
+  #street: str;
+  #number: integer;
+  #city: str;
 
-x: integer;
-y: scalar;
-q, w: bool;
-a, b, z, s,f: str;
-x[10]: integer;
-h[5], g[8]: str;
+  def setAddress(s: str, n: integer, c: str):
 
-const pi = 3.1415: scalar;
-const pi2 = number: integer;
-const test = "Nikos": str;
+  enddef;
 
-comp Book:
-
+  def printAddress():
+  
+  enddef;
 endcomp;
-
-comp Person:
-    #name: str;
-    #x[10], #a[2]: str;
-    #y: scalar;
-    #a, #b, #z, #s, #f: str;
-    #q, #w: bool;
-endcomp;
-
-def foo(x: integer, y : scalar, p: Person):
-
-enddef;
-
-def arrayFoo(c[]: integer, d[]: integer, y : scalar) -> integer:
-
-enddef;
-
-def foo2() -> scalar:
-
-enddef;
 
 
 def main():

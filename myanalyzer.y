@@ -9,7 +9,7 @@
     int yylex(void);
     int line_num;
     char* apply_char_star(const char*);
-    char * fix_multiple_char_stars(char *, char *, int);
+    char* fix_multiple_char_stars(char *, char *, int);
 %}
 
 %union{
@@ -98,7 +98,7 @@
 %type <string> comp_var_declarations
 %type <string> comp_var_identifiers
 %type <string> comp_array_var_declaration
-/* %type <string> comp_func_declarations */
+%type <string> comp_func_declarations
 
 
 %type <string> function
@@ -160,7 +160,6 @@ general_declarations:
 
 
 
-
 /* -------------------------------------------- Data Types ---------------------------------------------*/
 /* int, double, bool, string and complex types */
 general_var_types:
@@ -198,6 +197,7 @@ array_declaration:
 
 
 
+
 /* -------------------------------------------- Constant Variables Declaration ---------------------------------------------*/
 const_declarations:
     KW_CONST var_identifiers ASSIGN assinged_values ':' general_var_types ';' {$$ = template("const %s %s = %s;", $6, $2, $4);}
@@ -212,7 +212,11 @@ assinged_values:
 
 /* -------------------------------------------- Complex type declarations ---------------------------------------------*/
 comp_declarations:
-    KW_COMP TK_ID ':' comp_body_check KW_ENDCOMP ';' {$$ = template("\ntypedef struct %s {\n%s\n} %s;", $2, $4, $2);}
+    KW_COMP TK_ID ':' comp_body_check KW_ENDCOMP ';' {
+        $$ = template("\n#define SELF struct %s *self\n"
+                        "typedef struct %s {\n%s\n} %s;\n"
+                        "const %s ctor_%s = { %s };\n"
+                        "#undef SELF;", $2, $2, $4, $2, $2, $2, "", "");}
 ;
 
 /* check if comp body is empty */
@@ -223,9 +227,10 @@ comp_body_check:
 
 comp_body:
     comp_var_declarations 
-|   comp_var_declarations comp_body {$$ = template("%s\n%s", $1, $2);}
+|   comp_var_declarations comp_body  {$$ = template("%s\n%s", $1, $2);}
+|   comp_func_declarations
+|   comp_func_declarations comp_body {$$ = template("%s\n%s", $1, $2);}
 ;
-/* should add comp functions */
 
 comp_var_declarations:
     comp_var_identifiers ':' general_var_types ';'        {$$ = fix_multiple_char_stars($1, $3, 0);}
@@ -242,9 +247,20 @@ comp_array_var_declaration:
 |   comp_array_var_declaration ',' '#' TK_ID '[' TK_INT ']' {$$ = template("%s, %s[%s]", $1, $4, $6);}
 ;
 
-/* comp_func_declarations:
-
-; */
+comp_func_declarations:
+    KW_DEF TK_ID '(' parameters ')' ':' function_body KW_ENDDEF ';' {
+        if(!strcmp($4, ""))
+            $$ = template("\tvoid (*%s)(SELF);", $2);
+        else
+            $$ = template("\tvoid (*%s)(SELF, %s);", $2, $4);
+    }
+|   KW_DEF TK_ID '(' parameters ')' FN_RETURN general_var_types ':' function_body KW_ENDDEF ';' {
+        if (!strcmp($4, ""))
+            $$ = template("\t%s (*%s)(SELF);", $7, $2);
+        else 
+            $$ = template("\t%s (*%s)(SELF, %s);", $7, $2, $4);
+    }
+;
 
 
 /* to do 
@@ -309,15 +325,15 @@ int main() {
 char *fix_multiple_char_stars(char *id, char* type, int global){
     
     if(global){
-        if(!strcmp(type, "char *")){
+        if(!strcmp(type, "char *"))
             return template("char %s;", apply_char_star(id));
-        }
+
         return template("%s %s;", type, id);
     }
     
-    if(!strcmp(type, "char *")){
+    if(!strcmp(type, "char *"))
         return template("\tchar %s;", apply_char_star(id));
-    }
+
     return template("\t%s %s;", type, id);
 }
 
