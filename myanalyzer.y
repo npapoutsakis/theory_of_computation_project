@@ -91,13 +91,17 @@
 %type <string> array_declaration
 
 %type <string> const_declarations
-%type <string> tokens
+%type <string> assinged_values
 
 %type <string> comp_declarations
+%type <string> comp_body_check
 %type <string> comp_body
 %type <string> comp_var_declarations
 %type <string> comp_var_identifiers
 %type <string> comp_array_var_declaration
+
+%type <string> function
+%type <string> parameters
 
 %%
 
@@ -128,12 +132,12 @@ c_file:
 ;
 
 
+
+
 /*------------------------------------------ main function in c ----------------------------------------*/
 main_function:
     KW_DEF KW_BEGIN '(' ')' ':' function_body KW_ENDDEF ';' {$$ = template("\nint main() {\n\t%s\n}", $6);}
 ;
-
-
 
 /* declaration body is responsible for variable declaration (of any type) above main, that include functions and comps */
 declaration_body:
@@ -142,41 +146,25 @@ declaration_body:
 ;
 
 
-/* -------------------------------------------- Data types ---------------------------------------------*/
 
+
+/* -------------------------------------------- Variables -------------------------------------------- */
 /* Any type of declaration above main function */
 general_declarations:
     var_declarations
 |   const_declarations
 |   comp_declarations
-/* functions */
+|   function
 ;
 
+
+
+
+/* -------------------------------------------- Data Types ---------------------------------------------*/
+/* int, double, bool, string and complex types */
 general_var_types:
     basic_var_types
 |   TK_ID
-;
-
-/* simple variables */
-var_declarations:
-    var_identifiers ':' basic_var_types ';' {
-        if(!strcmp($3, "char *"))
-            $$ = template("char %s;", apply_char_star($1));
-        else
-            $$ = template("%s %s;", $3, $1);
-    }
-|   array_declaration ':' basic_var_types ';' {$$ = template("%s %s;", $3, $1);}
-;
-
-/* we also have arrays and comp data types with Identifiers and variable */
-var_identifiers:
-    TK_ID   {$$ = $1;}
-|   var_identifiers ',' TK_ID {$$ = template("%s, %s", $1, $3);}
-;
-
-array_declaration:
-    TK_ID '[' TK_INT ']'    {$$ = template("%s[%s]", $1, $3);}
-|   array_declaration ',' TK_ID '[' TK_INT ']' {$$ = template("%s, %s[%s]", $1, $3, $5);}
 ;
 
 /* basic data types double, int, char *, int(boolean) */
@@ -187,66 +175,143 @@ basic_var_types:
 |   KW_BOOL         {$$ = template("int");}
 ;
 
-tokens:
+
+
+
+/* -------------------------------------------- Simple Variables Declaration ---------------------------------------------*/
+var_declarations:
+    var_identifiers ':' general_var_types ';' {
+        if(!strcmp($3, "char *"))
+            $$ = template("char %s;", apply_char_star($1));
+        else
+            $$ = template("%s %s;", $3, $1);
+    }
+|   array_declaration ':' general_var_types ';' {
+        if(!strcmp($3, "char *"))
+            $$ = template("char %s;", apply_char_star($1));
+        else
+            $$ = template("%s %s;", $3, $1);
+    }
+;
+
+/* we also have arrays and comp data types with Identifiers and variable */
+var_identifiers:
+    TK_ID                     
+|   var_identifiers ',' TK_ID {$$ = template("%s, %s", $1, $3);}
+;
+
+array_declaration:
+    TK_ID '[' TK_INT ']'                       {$$ = template("%s[%s]", $1, $3);}
+|   array_declaration ',' TK_ID '[' TK_INT ']' {$$ = template("%s, %s[%s]", $1, $3, $5);}
+;
+
+
+
+/* -------------------------------------------- Constant Variables Declaration ---------------------------------------------*/
+const_declarations:
+    KW_CONST var_identifiers ASSIGN assinged_values ':' general_var_types ';' {$$ = template("const %s %s = %s;", $6, $2, $4);}
+;
+assinged_values:
     TK_INT
 |   TK_DOUBLE
 |   TK_STRING
-;
-
-/* constant variable grammar rules */
-const_declarations:
-    KW_CONST var_identifiers ASSIGN tokens ':' basic_var_types ';' {$$ = template("const %s %s = %s;", $6, $2, $4);}
 ;
 
 
 
 /* -------------------------------------------- Complex type declarations ---------------------------------------------*/
 comp_declarations:
-    KW_COMP TK_ID ':' comp_body KW_ENDCOMP ';' {$$ = template("\ntypedef struct %s {\n%s\n} %s;", $2, $4, $2);}
+    KW_COMP TK_ID ':' comp_body_check KW_ENDCOMP ';' {$$ = template("\ntypedef struct %s {\n%s\n} %s;", $2, $4, $2);}
+;
+
+/* check if comp body is empty */
+comp_body_check:
+    %empty {$$ = "";}
+|   comp_body
 ;
 
 comp_body:
     comp_var_declarations 
 |   comp_var_declarations comp_body {$$ = template("%s\n%s", $1, $2);}
 ;
+/* should add comp functions */
 
 comp_var_declarations:
-    comp_var_identifiers ':' general_var_types ';' {$$ = template("\t%s %s;", $3, $1);}
-|   comp_array_var_declaration ':' general_var_types ';'  {$$ = template("\t%s %s;", $3, $1);}
+    comp_var_identifiers ':' general_var_types ';' {
+        if(!strcmp($3, "char *"))
+            $$ = template("\tchar %s;", apply_char_star($1));
+        else
+            $$ = template("\t%s %s;", $3, $1);
+    }
+|   comp_array_var_declaration ':' general_var_types ';'  {
+        if(!strcmp($3, "char *"))
+            $$ = template("\tchar %s;", apply_char_star($1));
+        else
+            $$ = template("\t%s %s;", $3, $1);
+    }
 ;
 
 comp_var_identifiers:
-    '#' TK_ID {$$ = $2;}
+    '#' TK_ID                          {$$ = $2;}
 |   '#' TK_ID ',' comp_var_identifiers {$$ = template("%s, %s", $2, $4);}
 ;
 
 comp_array_var_declaration:
-    '#' TK_ID '[' TK_INT ']' {$$ = template("%s[%s]", $2, $4);}
+    '#' TK_ID '[' TK_INT ']'                                {$$ = template("%s[%s]", $2, $4);}
 |   comp_array_var_declaration ',' '#' TK_ID '[' TK_INT ']' {$$ = template("%s, %s[%s]", $1, $4, $6);}
 ;
 
+
+
+
 /* to do 
-    1. comps 
+    1. comps -> vars ok, need functions
     2. functions
     3. expressions
+    4. statements
  */
 
+/* -------------------------------------------- Functions & Parameters Declaration ---------------------------------------------*/
+function:
+    KW_DEF TK_ID '(' parameters ')' ':' function_body KW_ENDDEF ';'                             {$$ = template("void %s(%s) {\n%s\n}\n", $2, $4, $7);}
+|   KW_DEF TK_ID '(' parameters ')' FN_RETURN general_var_types ':' function_body KW_ENDDEF ';' {$$ = template("%s %s(%s) {\n%s\n}\n", $7, $2, $4, $9);}
+;
 
-
-
-
-
-
-
-
-
-
-
+parameters:
+    %empty                                             {$$ = "";}
+|   TK_ID ':' general_var_types                        {$$ = template("%s %s", $3, $1);}
+|   TK_ID ':' general_var_types ',' parameters         {$$ = template("%s %s, %s", $3, $1, $5);}
+|   TK_ID '[' ']' ':' general_var_types                {$$ = template("%s *%s", $5, $1);}
+|   TK_ID '[' ']' ':' general_var_types ',' parameters {$$ = template("%s *%s, %s", $5, $1, $7);}
+;
 
 
 function_body:
-    %empty {$$ = template("");}
+    %empty {$$ = "";}
 ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 %%

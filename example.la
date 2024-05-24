@@ -1,3 +1,4 @@
+@defmacro number 5
 
 x: integer;
 y: scalar;
@@ -7,19 +8,33 @@ x[10]: integer;
 h[5], g[8]: scalar;
 
 const pi = 3.1415: scalar;
-const pi2 = 3: integer;
+const pi2 = number: integer;
 const test = "Nikos": str;
 
-comp Test:
-    #name: str;
+comp Book:
+
 endcomp;
 
 comp Person:
     #name: str;
-    #x[10], #a[2]: integer;
+    #x[10], #a[2]: str;
     #y: scalar;
+    #a, #b, #z, #s, #f: str;
     #q, #w: bool;
 endcomp;
+
+def foo(x: integer, y : scalar, p: Person):
+
+enddef;
+
+def arrayFoo(c[]: integer, d[]: integer, y : scalar) -> integer:
+
+enddef;
+
+def foo2() -> scalar:
+
+enddef;
+
 
 def main():
 
