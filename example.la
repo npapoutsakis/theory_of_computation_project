@@ -1,4 +1,6 @@
 
 def main():
-    x = 1
+    while (i < 10):
+        ;
+    endwhile;
 enddef;

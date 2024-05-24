@@ -308,7 +308,7 @@ parameters:
 
 function_body:
     %empty {$$ = "";}
-|   general_expression
+|   general_statements
 ;
 
 
@@ -362,8 +362,7 @@ assigning_expressions:
 
 identifier_expressions:
     TK_ID
-|   TK_ID '[' TK_INT ']' { $$ = template("%s[%s]", $1, $3); }
-|   TK_ID '[' TK_ID ']'  { $$ = template("%s[%s]", $1, $3); }
+|   TK_ID '[' general_expression ']' { $$ = template("%s[%s]", $1, $3); }
 ;
 
 
@@ -372,47 +371,61 @@ identifier_expressions:
 
 
 general_statements:
+    assign_statement
+|   if_statement
+|   for_loop_statement
+|   while_statement
+|   break_statement
+|   continue_statement
+|   return_statement
+|   function_statement
+|   empty_statement
+|   array_comprehension
 ;
-
 
 assign_statement:
+    assigning_expressions ';' {$$ = template("%s;", $1);}
 ;
 
-
-
 if_statement:
+    KW_IF '(' general_expression ')' ':' general_statements KW_ENDIF ';'                                {$$ = template("if (%s) {\n\t\t%s\n\t}", $3, $6);}
+|   KW_IF '(' general_expression ')' ':' general_statements KW_ELSE ':' general_statements KW_ENDIF ';' {$$ = template("if (%s) {\n\t\t%s\n\t} else {\n\t\t%s\n\t}", $3, $6, $9);}
 ;
 
 for_loop_statement:
+    KW_FOR TK_ID KW_IN '[' arithmetic_expressions ':' arithmetic_expressions ']' ':' general_statements KW_ENDFOR ';'                            {$$ = template("for (int %s = %s; %s < %s; %s++) {\n\t\t%s\n\t}", $2, $5, $2, $7, $2, $10);}
+|   KW_FOR TK_ID KW_IN '[' arithmetic_expressions ':' arithmetic_expressions ':' arithmetic_expressions ']' ':' general_statements KW_ENDFOR ';' {$$ = template("for (int %s = %s; %s < %s; %s = %s + %s) {\n\t\t%s\n\t}", $2, $5, $2, $7, $2, $2, $9, $12);}
 ;
 
 while_statement:
-
+    KW_WHILE '(' general_expression ')' ':' general_statements KW_ENDWHILE ';' {$$ = template("while (%s) {\n\t\t%s\n\t}", $3, $6);}
 ;
 
 break_statement:
-
+    KW_BREAK ';' {$$ = template("break;");}
 ;
 
 continue_statement:
-
+    KW_CONTINUE ';' {$$ = template("continue;");}
 ;
 
 return_statement:
+    KW_RETURN ';'                    {$$ = template("return;");}
+|   KW_RETURN general_expression ';' {$$ = template("return %s;", $2);}
 ;
 
 function_statement:
-
 ;
+
 
 empty_statement:
     ';' {$$ = ";";}
 ;
 
-
 array_comprehension:
-
 ;
+
+
 
 %%
 int main() {
