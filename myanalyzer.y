@@ -3,14 +3,13 @@
 /*           2019030206             */
 
 %{
-    #include <stdio.h>
-    #include <math.h>
     #include "lambdalib.h"
     #include "cgen.h"
 
-    extern int yylex(void);
+    int yylex(void);
     int line_num;
-    char* apply_char_star(const char* var_list);
+    char* apply_char_star(const char*);
+    char * fix_multiple_char_stars(char *, char *, int);
 %}
 
 %union{
@@ -99,6 +98,8 @@
 %type <string> comp_var_declarations
 %type <string> comp_var_identifiers
 %type <string> comp_array_var_declaration
+/* %type <string> comp_func_declarations */
+
 
 %type <string> function
 %type <string> parameters
@@ -180,23 +181,13 @@ basic_var_types:
 
 /* -------------------------------------------- Simple Variables Declaration ---------------------------------------------*/
 var_declarations:
-    var_identifiers ':' general_var_types ';' {
-        if(!strcmp($3, "char *"))
-            $$ = template("char %s;", apply_char_star($1));
-        else
-            $$ = template("%s %s;", $3, $1);
-    }
-|   array_declaration ':' general_var_types ';' {
-        if(!strcmp($3, "char *"))
-            $$ = template("char %s;", apply_char_star($1));
-        else
-            $$ = template("%s %s;", $3, $1);
-    }
+    var_identifiers ':' general_var_types ';'   {$$ = fix_multiple_char_stars($1, $3, 1);}
+|   array_declaration ':' general_var_types ';' {$$ = fix_multiple_char_stars($1, $3, 1);}
 ;
 
 /* we also have arrays and comp data types with Identifiers and variable */
 var_identifiers:
-    TK_ID                     
+    TK_ID                                          
 |   var_identifiers ',' TK_ID {$$ = template("%s, %s", $1, $3);}
 ;
 
@@ -237,18 +228,8 @@ comp_body:
 /* should add comp functions */
 
 comp_var_declarations:
-    comp_var_identifiers ':' general_var_types ';' {
-        if(!strcmp($3, "char *"))
-            $$ = template("\tchar %s;", apply_char_star($1));
-        else
-            $$ = template("\t%s %s;", $3, $1);
-    }
-|   comp_array_var_declaration ':' general_var_types ';'  {
-        if(!strcmp($3, "char *"))
-            $$ = template("\tchar %s;", apply_char_star($1));
-        else
-            $$ = template("\t%s %s;", $3, $1);
-    }
+    comp_var_identifiers ':' general_var_types ';'        {$$ = fix_multiple_char_stars($1, $3, 0);}
+|   comp_array_var_declaration ':' general_var_types ';'  {$$ = fix_multiple_char_stars($1, $3, 0);}
 ;
 
 comp_var_identifiers:
@@ -261,12 +242,14 @@ comp_array_var_declaration:
 |   comp_array_var_declaration ',' '#' TK_ID '[' TK_INT ']' {$$ = template("%s, %s[%s]", $1, $4, $6);}
 ;
 
+/* comp_func_declarations:
 
+; */
 
 
 /* to do 
     1. comps -> vars ok, need functions
-    2. functions
+    2. functions -> need to fix body and return
     3. expressions
     4. statements
  */
@@ -323,7 +306,22 @@ int main() {
     printf("\x1b[31m""Rejected!\n""\x1b[0m");
 }
 
-char* apply_char_star(const char* var_list) {
+char *fix_multiple_char_stars(char *id, char* type, int global){
+    
+    if(global){
+        if(!strcmp(type, "char *")){
+            return template("char %s;", apply_char_star(id));
+        }
+        return template("%s %s;", type, id);
+    }
+    
+    if(!strcmp(type, "char *")){
+        return template("\tchar %s;", apply_char_star(id));
+    }
+    return template("\t%s %s;", type, id);
+}
+
+char *apply_char_star(const char* var_list) {
     char* result = (char*)malloc(strlen(var_list) * 2 + 1); // allocate sufficient memory
     result[0] = '\0';
     const char* delim = ", ";

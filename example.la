@@ -5,7 +5,7 @@ y: scalar;
 q, w: bool;
 a, b, z, s,f: str;
 x[10]: integer;
-h[5], g[8]: scalar;
+h[5], g[8]: str;
 
 const pi = 3.1415: scalar;
 const pi2 = number: integer;
