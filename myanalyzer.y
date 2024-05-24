@@ -105,7 +105,24 @@
 /* %type <string> return */
 
 
-%type <string> expression
+%type <string> general_expression
+%type <string> arithmetic_expressions
+%type <string> relational_expressions
+%type <string> assigning_expressions
+%type <string> identifier_expressions
+
+
+%type <string> general_statements
+%type <string> assign_statement
+%type <string> if_statement
+%type <string> for_loop_statement
+%type <string> while_statement
+%type <string> break_statement
+%type <string> continue_statement
+%type <string> return_statement
+%type <string> function_statement
+%type <string> empty_statement
+%type <string> array_comprehension
 
 %%
 
@@ -291,67 +308,111 @@ parameters:
 
 function_body:
     %empty {$$ = "";}
+|   general_expression
 ;
 
 
 
 
 /* -------------------------------------------- Expressions ---------------------------------------------*/
-expression:
-    expression KW_AND expression  {$$ = template("%s && %s", $1, $3);}
-|   expression KW_OR expression   {$$ = template("%s || %s", $1, $3);}
-|   KW_NOT expression             {$$ = template("!%s", $2);}
-|   KW_TRUE                       {$$ = "1";}
-|   KW_FALSE                      {$$ = "0";}
-|   '(' expression ')'            {$$ = template("(%s)", $2);}
+general_expression:
+   '(' general_expression ')'                     {$$ = template("(%s)", $2);}
+|   general_expression KW_AND general_expression  {$$ = template("%s && %s", $1, $3);}
+|   general_expression KW_OR general_expression   {$$ = template("%s || %s", $1, $3);}
+|   KW_NOT general_expression                     {$$ = template("!%s", $2);}
+|   KW_TRUE                                       {$$ = "1";}
+|   KW_FALSE                                      {$$ = "0";}
+|   TK_STRING                                     {$$ = $1;}
+|   arithmetic_expressions                        {$$ = $1;}
+|   relational_expressions                        {$$ = $1;}
+|   assigning_expressions                         {$$ = $1;}
+|   identifier_expressions                        {$$ = $1;}
 ;
-
-
-arithmetics:
-
-;
-
-
-
-
-
 
 arithmetic_expressions:
-    TK_INTEGER {$$ = $1;}
-  | TK_FLOAT {$$ = $1;}
-  | expressions OP_POWER expressions {$$ = template("pow(%s, %s)", $1, $3);}
-  | expressions OP_MULT expressions {$$ = template("%s * %s",$1, $3);}
-  | expressions OP_DIV expressions {$$ = template("%s / %s", $1, $3);}
-  | expressions OP_MOD expressions {$$ = template("%s %% %s", $1, $3);}
-  | expressions OP_PLUS expressions {$$ = template("%s + %s", $1, $3);}
-  | expressions OP_MINUS expressions {$$ = template("%s - %s", $1, $3);}
-  | OP_PLUS expressions {$$ = template("+%s", $2);}
-  | OP_MINUS expressions {$$ = template("-%s", $2);};
-
+    TK_INT
+|   TK_DOUBLE
+|   '+' general_expression                         {$$ = template("+%s", $2);}
+|   '-' general_expression                         {$$ = template("-%s", $2);}
+|   general_expression '-' general_expression      {$$ = template("%s - %s", $1, $3);}
+|   general_expression '+' general_expression      {$$ = template("%s + %s", $1, $3);}
+|   general_expression '*' general_expression      {$$ = template("%s * %s", $1, $3);}
+|   general_expression '/' general_expression      {$$ = template("%s / %s", $1, $3);}
+|   general_expression '%' general_expression      {$$ = template("%s %% %s", $1, $3);}
+|   general_expression FN_POW general_expression   {$$ = template("pow(%s, %s)", $1, $3);}
+;
 
 relational_expressions:
-  expressions RP_LESS expressions {$$ = template("%s < %s",$1, $3);}
-  | expressions RP_LESSEQUALS expressions {$$ = template("%s <= %s", $1, $3);}
-  | expressions RP_MORE expressions {$$ = template("%s > %s", $1, $3);}
-  | expressions RP_MOREEQUALS expressions {$$ = template("%s >= %s", $1, $3);}
-  | expressions RP_EQUALS expressions {$$ = template("%s == %s", $1, $3);}
-  | expressions RP_NOTEQUALS expressions {$$ = template("%s != %s", $1, $3);};
+    general_expression RP_EQUAL general_expression         {$$ = template("%s == %s", $1, $3);}
+|   general_expression RP_NOT_EQUAL general_expression     {$$ = template("%s != %s", $1, $3);}
+|   general_expression RP_LESS_EQUAL general_expression    {$$ = template("%s <= %s", $1, $3);}
+|   general_expression RP_GREARER_EQUAL general_expression {$$ = template("%s >= %s", $1, $3);}
+|   general_expression RP_LESS general_expression          {$$ = template("%s < %s", $1, $3);}
+|   general_expression RP_GREATER general_expression       {$$ = template("%s > %s", $1, $3);}
+;
+
+assigning_expressions:
+    identifier_expressions ASSIGN general_expression    {$$ = template("%s = %s", $1, $3);}
+|   identifier_expressions SELF_ADD general_expression  {$$ = template("%s += %s", $1, $3);}
+|   identifier_expressions SELF_SUB general_expression  {$$ = template("%s -= %s" , $1, $3);}
+|   identifier_expressions SELF_MULT general_expression {$$ = template("%s *= %s", $1, $3);}
+|   identifier_expressions SELF_DIV general_expression  {$$ = template("%s /= %s", $1, $3);}
+|   identifier_expressions SELF_MOD general_expression  {$$ = template("%s %= %s", $1, $3);};
+;
+
+identifier_expressions:
+    TK_ID
+|   TK_ID '[' TK_INT ']' { $$ = template("%s[%s]", $1, $3); }
+|   TK_ID '[' TK_ID ']'  { $$ = template("%s[%s]", $1, $3); }
+;
 
 
-assign_expressions:
-  identifier_expressions AP_ASSIGN expressions {$$ = template("%s = %s", $1, $3);}
-  | identifier_expressions AP_PLUSASSIGN expressions {$$ = template("%s += %s", $1, $3);}
-  | identifier_expressions AP_MINASSIGN expressions {$$ = template("%s -= %s" , $1, $3);}
-  | identifier_expressions AP_MULASSIGN expressions {$$ = template("%s *= %s", $1, $3);}
-  | identifier_expressions AP_DIVASSIGN expressions {$$ = template("%s /= %s", $1, $3);}
-  | identifier_expressions AP_MODASSIGN expressions {$$ = template("%s %= %s", $1, $3);}; 
+
+/* -------------------------------------------- Statements ---------------------------------------------*/
+
+
+general_statements:
+;
+
+
+assign_statement:
+;
 
 
 
+if_statement:
+;
+
+for_loop_statement:
+;
+
+while_statement:
+
+;
+
+break_statement:
+
+;
+
+continue_statement:
+
+;
+
+return_statement:
+;
+
+function_statement:
+
+;
+
+empty_statement:
+    ';' {$$ = ";";}
+;
 
 
+array_comprehension:
 
-
+;
 
 %%
 int main() {
