@@ -80,10 +80,9 @@
 %type <string> declaration_body
 
 %type <string> function_body
+%type <string> general_declarations
 %type <string> general_var_types
 %type <string> basic_var_types
-%type <string> general_declarations
-
 
 %type <string> var_declarations
 %type <string> var_identifiers
@@ -103,6 +102,10 @@
 
 %type <string> function
 %type <string> parameters
+/* %type <string> return */
+
+
+%type <string> expression
 
 %%
 
@@ -215,8 +218,9 @@ comp_declarations:
     KW_COMP TK_ID ':' comp_body_check KW_ENDCOMP ';' {
         $$ = template("\n#define SELF struct %s *self\n"
                         "typedef struct %s {\n%s\n} %s;\n"
+                        "\n\n%s\n\n"
                         "const %s ctor_%s = { %s };\n"
-                        "#undef SELF;", $2, $2, $4, $2, $2, $2, "", "");}
+                        "#undef SELF;", $2, $2, $4, $2, "", $2, $2, "", "");}
 ;
 
 /* check if comp body is empty */
@@ -292,19 +296,55 @@ function_body:
 
 
 
+/* -------------------------------------------- Expressions ---------------------------------------------*/
+expression:
+    expression KW_AND expression  {$$ = template("%s && %s", $1, $3);}
+|   expression KW_OR expression   {$$ = template("%s || %s", $1, $3);}
+|   KW_NOT expression             {$$ = template("!%s", $2);}
+|   KW_TRUE                       {$$ = "1";}
+|   KW_FALSE                      {$$ = "0";}
+|   '(' expression ')'            {$$ = template("(%s)", $2);}
+;
+
+
+arithmetics:
+
+;
 
 
 
 
 
 
+arithmetic_expressions:
+    TK_INTEGER {$$ = $1;}
+  | TK_FLOAT {$$ = $1;}
+  | expressions OP_POWER expressions {$$ = template("pow(%s, %s)", $1, $3);}
+  | expressions OP_MULT expressions {$$ = template("%s * %s",$1, $3);}
+  | expressions OP_DIV expressions {$$ = template("%s / %s", $1, $3);}
+  | expressions OP_MOD expressions {$$ = template("%s %% %s", $1, $3);}
+  | expressions OP_PLUS expressions {$$ = template("%s + %s", $1, $3);}
+  | expressions OP_MINUS expressions {$$ = template("%s - %s", $1, $3);}
+  | OP_PLUS expressions {$$ = template("+%s", $2);}
+  | OP_MINUS expressions {$$ = template("-%s", $2);};
 
 
+relational_expressions:
+  expressions RP_LESS expressions {$$ = template("%s < %s",$1, $3);}
+  | expressions RP_LESSEQUALS expressions {$$ = template("%s <= %s", $1, $3);}
+  | expressions RP_MORE expressions {$$ = template("%s > %s", $1, $3);}
+  | expressions RP_MOREEQUALS expressions {$$ = template("%s >= %s", $1, $3);}
+  | expressions RP_EQUALS expressions {$$ = template("%s == %s", $1, $3);}
+  | expressions RP_NOTEQUALS expressions {$$ = template("%s != %s", $1, $3);};
 
 
-
-
-
+assign_expressions:
+  identifier_expressions AP_ASSIGN expressions {$$ = template("%s = %s", $1, $3);}
+  | identifier_expressions AP_PLUSASSIGN expressions {$$ = template("%s += %s", $1, $3);}
+  | identifier_expressions AP_MINASSIGN expressions {$$ = template("%s -= %s" , $1, $3);}
+  | identifier_expressions AP_MULASSIGN expressions {$$ = template("%s *= %s", $1, $3);}
+  | identifier_expressions AP_DIVASSIGN expressions {$$ = template("%s /= %s", $1, $3);}
+  | identifier_expressions AP_MODASSIGN expressions {$$ = template("%s %= %s", $1, $3);}; 
 
 
 
