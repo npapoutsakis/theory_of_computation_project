@@ -122,7 +122,10 @@
 %type <string> return_statement
 %type <string> function_statement
 %type <string> empty_statement
-%type <string> array_comprehension
+/* %type <string> array_comprehension */
+
+%type <string> function_arguments
+
 
 %%
 
@@ -284,12 +287,6 @@ comp_func_declarations:
 ;
 
 
-/* to do 
-    1. comps -> vars ok, need functions
-    2. functions -> need to fix body and return
-    3. expressions
-    4. statements
- */
 
 /* -------------------------------------------- Functions & Parameters Declaration ---------------------------------------------*/
 function:
@@ -305,10 +302,17 @@ parameters:
 |   TK_ID '[' ']' ':' general_var_types ',' parameters {$$ = template("%s *%s, %s", $5, $1, $7);}
 ;
 
+function_arguments:
+    general_expression                        {$$ = template("%s", $1);}
+|   general_expression ',' function_arguments {$$ = template("%s, %s", $1, $3);}
+;
 
+/* general function body */
 function_body:
-    %empty {$$ = "";}
-|   general_statements
+    general_statements
+|   general_declarations
+|   function_body general_statements    {$$ = template("%s\n%s", $1, $2);}
+|   function_body general_declarations  {$$ = template("%s\n%s", $1, $2);}
 ;
 
 
@@ -327,6 +331,7 @@ general_expression:
 |   relational_expressions                        {$$ = $1;}
 |   assigning_expressions                         {$$ = $1;}
 |   identifier_expressions                        {$$ = $1;}
+|   function_statement                            {$$ = $1;}
 ;
 
 arithmetic_expressions:
@@ -362,14 +367,12 @@ assigning_expressions:
 
 identifier_expressions:
     TK_ID
-|   TK_ID '[' general_expression ']' { $$ = template("%s[%s]", $1, $3); }
+|   TK_ID '[' TK_ID ']' { $$ = template("%s[%s]", $1, $3); }
 ;
 
 
 
 /* -------------------------------------------- Statements ---------------------------------------------*/
-
-
 general_statements:
     assign_statement
 |   if_statement
@@ -380,7 +383,6 @@ general_statements:
 |   return_statement
 |   function_statement
 |   empty_statement
-|   array_comprehension
 ;
 
 assign_statement:
@@ -415,15 +417,14 @@ return_statement:
 ;
 
 function_statement:
+    TK_ID '(' ')' ';' {$$ = template("%s();", $1);}
+|   TK_ID '(' function_arguments ')' ';' {$$ = template("%s(%s);", $1, $3);}
 ;
-
 
 empty_statement:
     ';' {$$ = ";";}
 ;
 
-array_comprehension:
-;
 
 
 
