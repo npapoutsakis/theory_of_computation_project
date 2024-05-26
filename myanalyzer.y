@@ -123,6 +123,7 @@
 %type <string> empty_statement
 %type <string> array_comprehension
 %type <string> version_1 version_2
+%type <string> statement_block
 
 
 
@@ -391,17 +392,17 @@ assign_statement:
 ;
 
 if_statement:
-    KW_IF '(' general_expression ')' ':' general_statements KW_ENDIF ';'                                {$$ = template("if (%s) {\n\t\t%s\n\t}", $3, $6);}
-|   KW_IF '(' general_expression ')' ':' general_statements KW_ELSE ':' general_statements KW_ENDIF ';' {$$ = template("if (%s) {\n\t\t%s\n\t} else {\n\t\t%s\n\t}", $3, $6, $9);}
+    KW_IF '(' general_expression ')' ':' statement_block KW_ENDIF ';'                             {$$ = template("if (%s) {\n\t\t%s\n\t}", $3, $6);}
+|   KW_IF '(' general_expression ')' ':' statement_block KW_ELSE ':' statement_block KW_ENDIF ';' {$$ = template("if (%s) {\n\t\t%s\n\t} else {\n\t\t%s\n\t}", $3, $6, $9);}
 ;
 
 for_loop_statement:
-    KW_FOR TK_ID KW_IN '[' arithmetic_expressions ':' arithmetic_expressions ']' ':' general_statements KW_ENDFOR ';'                            {$$ = template("for (int %s = %s; %s < %s; %s++) {\n\t\t%s\n\t}", $2, $5, $2, $7, $2, $10);}
-|   KW_FOR TK_ID KW_IN '[' arithmetic_expressions ':' arithmetic_expressions ':' arithmetic_expressions ']' ':' general_statements KW_ENDFOR ';' {$$ = template("for (int %s = %s; %s < %s; %s = %s + %s) {\n\t\t%s\n\t}", $2, $5, $2, $7, $2, $2, $9, $12);}
+    KW_FOR TK_ID KW_IN '[' general_expression ':' general_expression ']' ':' statement_block KW_ENDFOR ';'                        {$$ = template("for (int %s = %s; %s < %s; %s++) {\n\t\t%s\n\t}", $2, $5, $2, $7, $2, $10);}
+|   KW_FOR TK_ID KW_IN '[' general_expression ':' general_expression ':' general_expression ']' ':' statement_block KW_ENDFOR ';' {$$ = template("for (int %s = %s; %s < %s; %s = %s + %s) {\n\t\t%s\n\t}", $2, $5, $2, $7, $2, $2, $9, $12);}
 ;
 
 while_statement:
-    KW_WHILE '(' general_expression ')' ':' general_statements KW_ENDWHILE ';' {$$ = template("while (%s) {\n\t\t%s\n\t}", $3, $6);}
+    KW_WHILE '(' general_expression ')' ':' statement_block KW_ENDWHILE ';' {$$ = template("while (%s) {\n\t\t%s\n\t}", $3, $6);}
 ;
 
 break_statement:
@@ -453,7 +454,12 @@ empty_statement:
     ';' {$$ = ";";}
 ;
 
-
+statement_block:
+    general_statements                   {$$ = template("%s", $1);}
+|   general_declarations                 {$$ = template("%s", $1);}
+|   statement_block general_statements   {$$ = template("%s\n%s", $1, $2);}
+|   statement_block general_declarations {$$ = template("%s\n%s", $1, $2);}
+;
 
 
 

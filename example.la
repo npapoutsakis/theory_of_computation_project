@@ -1,23 +1,55 @@
--- File: useless.ka
--- A piece of Kappa code for demonstration purposes
+limit, num, counter: integer;
 
-@defmacro N -100
-
-a, b: integer;
-
-def cube(i: integer)-> integer:
-   return i*i*i;
-enddef;
+def prime(n: integer)-> bool: 
+   i: integer; 
+   result, isPrime: bool;
+      
+  if (n < 0): 
+    result = prime(-n);
+  else: 
+    if (n < 2): 
+      result = False;    
+    else: 
+      if (n == 2): 
+        result = True;
+      else: 
+        if (n % 2 == 0):
+          result = False;
+        else:  
+          i = 3;
+          isPrime = True;
+          while (isPrime and (i < n / 2) ): 
+            isPrime = n % i != 0;
+            i = i + 2;
+          endwhile;
+          result = isPrime;
+        endif;
+      endif;
+    endif;
+  endif;
    
-def add(n: int, k: int)-> integer:
-   j: integer;
-  
-   j = (N-n) + cube(k);
-   writeInteger(j);
-   return j;
+  return result;
 enddef;
 
 def main(): 
-   new_array := [x/5 for x:50] : scalar;
-   new_array_v2 := [(x + x)*5 for x:integer in new_array of 50]: integer;
+
+  limit = readInteger();  
+
+  -- 2 is prime
+  writeInteger(2);
+  writeStr(" "); 
+
+  counter = 1; -- count the prime numbers found
+  -- check only odd numbers for primality  
+  for num in [3: limit + 1: 2]:  
+    if (prime(num)):  
+      counter = counter + 1;
+      writeInteger(num);
+      writeStr(" ");
+    endif;      
+  endfor;
+  
+   writeStr("\nThe total number of primes found is:");
+   writeInteger(counter);
+   writeStr("\n");   
 enddef;
