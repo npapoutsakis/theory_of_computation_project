@@ -18,7 +18,6 @@ def add(n: int, k: int)-> integer:
 enddef;
 
 def main(): 
-   a = readInteger();
-   b = readInteger();
-   add(a, b); -- Here you can see some dummy comments!
+   new_array := [x/5 for x:50] : scalar;
+   new_array_v2 := [x*5 for x:integer in new_array of 50]: integer;
 enddef;

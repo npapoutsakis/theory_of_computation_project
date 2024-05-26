@@ -10,6 +10,7 @@
     int line_num;
     char* apply_char_star(const char*);
     char* fix_multiple_char_stars(char *, char *, int);
+    char* replaceExpression(char *, char *, char *);
 %}
 
 %union{
@@ -99,11 +100,9 @@
 %type <string> comp_array_var_declaration
 %type <string> comp_func_declarations
 
-
 %type <string> function
 %type <string> parameters
-/* %type <string> return */
-
+%type <string> function_arguments
 
 %type <string> general_expression
 %type <string> arithmetic_expressions
@@ -111,8 +110,7 @@
 %type <string> assigning_expressions
 %type <string> identifier_expressions
 
-
-%type <string> general_statements
+%type <string> general_statements 
 %type <string> assign_statement
 %type <string> if_statement
 %type <string> for_loop_statement
@@ -121,11 +119,12 @@
 %type <string> continue_statement
 %type <string> return_statement
 %type <string> function_statement
-%type <string> empty_statement
-/* %type <string> array_comprehension */
-
-%type <string> function_arguments
 %type <string> functions_inline_statements
+%type <string> empty_statement
+%type <string> array_comprehension
+%type <string> version_1 version_2
+
+
 
 %%
 
@@ -383,15 +382,12 @@ general_statements:
 |   continue_statement
 |   return_statement
 |   functions_inline_statements
+|   array_comprehension
 |   empty_statement
 ;
 
 assign_statement:
     assigning_expressions ';' {$$ = template("%s;", $1);}
-;
-
-functions_inline_statements:
-    function_statement ';' {$$ = template("%s;", $1);}
 ;
 
 if_statement:
@@ -421,14 +417,43 @@ return_statement:
 |   KW_RETURN general_expression ';' {$$ = template("return %s;", $2);}
 ;
 
+functions_inline_statements:
+    function_statement ';' {$$ = template("%s;", $1);}
+;
+
 function_statement:
     TK_ID '(' ')' {$$ = template("%s()", $1);}
 |   TK_ID '(' function_arguments ')' {$$ = template("%s(%s)", $1, $3);}
 ;
 
+array_comprehension:
+    version_1
+|   version_2
+;
+
+version_1:
+    TK_ID SELF_CLN_ASSIGN '[' general_expression KW_FOR TK_ID ':' TK_INT ']' ':' general_var_types ';' 
+    {
+        $$ = template("%s* %s = (%s*)malloc(%s*sizeof(%s));\n"
+                      "\tfor(int %s=0; %s < %s; ++%s) {\n"
+                      "\t\t%s[%s] = %s;\n\t}", $11, $1, $11, $8, $11, $6, $6, $8, $6, $1, $6, $4);
+    }
+;
+
+version_2:
+    TK_ID SELF_CLN_ASSIGN '[' general_expression KW_FOR TK_ID ':' general_var_types KW_IN TK_ID KW_OF TK_INT ']' ':' general_var_types ';' 
+    {
+        $$ = template("%s* %s = (%s*)malloc(%s*sizeof(%s));\n"
+                      "\tfor(int %s_i=0; %s_i < %s; ++%s_i) {\n"
+                      "\t\t%s[%s_i] = %s;\n\t}", $15, $1, $15, $12, $15, $10, $10, $12, $10, $1, $10, replaceExpression($4, $6, $10));
+    }
+;
+
 empty_statement:
     ';' {$$ = ";";}
 ;
+
+
 
 
 
@@ -440,6 +465,10 @@ int main() {
         return -1;
     }
     printf("\x1b[31m""Rejected!\n""\x1b[0m");
+}
+
+char *replaceExpression(char *expression, char *identifier, char *array){
+    
 }
 
 char *fix_multiple_char_stars(char *id, char* type, int global){
