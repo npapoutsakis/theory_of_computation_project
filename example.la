@@ -19,5 +19,5 @@ enddef;
 
 def main(): 
    new_array := [x/5 for x:50] : scalar;
-   new_array_v2 := [x*5 for x:integer in new_array of 50]: integer;
+   new_array_v2 := [(x + x)*5 for x:integer in new_array of 50]: integer;
 enddef;

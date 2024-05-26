@@ -10,7 +10,7 @@
     int line_num;
     char* apply_char_star(const char*);
     char* fix_multiple_char_stars(char *, char *, int);
-    char* replaceExpression(char *, char *, char *);
+    char* parseExpression(char *, char *, char *);
 %}
 
 %union{
@@ -445,14 +445,13 @@ version_2:
     {
         $$ = template("%s* %s = (%s*)malloc(%s*sizeof(%s));\n"
                       "\tfor(int %s_i=0; %s_i < %s; ++%s_i) {\n"
-                      "\t\t%s[%s_i] = %s;\n\t}", $15, $1, $15, $12, $15, $10, $10, $12, $10, $1, $10, replaceExpression($4, $6, $10));
+                      "\t\t%s[%s_i] = %s;\n\t}", $15, $1, $15, $12, $15, $10, $10, $12, $10, $1, $10, parseExpression($4, $6, $10));
     }
 ;
 
 empty_statement:
     ';' {$$ = ";";}
 ;
-
 
 
 
@@ -467,8 +466,53 @@ int main() {
     printf("\x1b[31m""Rejected!\n""\x1b[0m");
 }
 
-char *replaceExpression(char *expression, char *identifier, char *array){
-    
+char *parseExpression(char *expression, char *identifier, char *array){    
+    char *modifiedExpression = NULL;
+
+    char *temp = (char *)malloc((4 + 2*strlen(array)) * sizeof(char));
+    sprintf(temp, "%s[%s_i]", array, array);
+
+    // Calculate the length of the new expression
+    int newLength = strlen(expression);
+    int idLength = strlen(identifier);
+    int tempLength = strlen(temp);
+    int count = 0;
+
+    // Find how many times the identifier appears in the expression
+    char *pos = expression;
+    while ((pos = strstr(pos, identifier)) != NULL) {
+        count++;
+        pos += idLength;
+    }
+
+    // Allocate memory for the new expression
+    newLength = newLength + count * (tempLength - idLength);
+    modifiedExpression = (char *)malloc((newLength + 1) * sizeof(char));
+
+    // Replace all occurrences of identifier with temp
+    char *currentPos = expression;
+    char *nextPos;
+    char *resultPos = modifiedExpression;
+
+    while ((nextPos = strstr(currentPos, identifier)) != NULL) {
+        // Copy the part before the identifier
+        int len = nextPos - currentPos;
+        strncpy(resultPos, currentPos, len);
+        resultPos += len;
+
+        // Copy the temp instead of the identifier
+        strcpy(resultPos, temp);
+        resultPos += tempLength;
+
+        // Move past the identifier in the original expression
+        currentPos = nextPos + idLength;
+    }
+
+    // Copy the remaining part of the original expression
+    strcpy(resultPos, currentPos);
+
+    free(temp);
+    return modifiedExpression;
 }
 
 char *fix_multiple_char_stars(char *id, char* type, int global){
