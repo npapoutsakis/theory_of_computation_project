@@ -1,0 +1,5 @@
+compiler
+lex.yy.c
+myanalyzer.output
+myanalyzer.tab.h
+myanalyzer.tab.c

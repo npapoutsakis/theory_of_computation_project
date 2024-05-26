@@ -125,7 +125,7 @@
 /* %type <string> array_comprehension */
 
 %type <string> function_arguments
-
+%type <string> functions_inline_statements
 
 %%
 
@@ -290,8 +290,8 @@ comp_func_declarations:
 
 /* -------------------------------------------- Functions & Parameters Declaration ---------------------------------------------*/
 function:
-    KW_DEF TK_ID '(' parameters ')' ':' function_body KW_ENDDEF ';'                             {$$ = template("void %s(%s) {\n%s\n}\n", $2, $4, $7);}
-|   KW_DEF TK_ID '(' parameters ')' FN_RETURN general_var_types ':' function_body KW_ENDDEF ';' {$$ = template("%s %s(%s) {\n%s\n}\n", $7, $2, $4, $9);}
+    KW_DEF TK_ID '(' parameters ')' ':' function_body KW_ENDDEF ';'                             {$$ = template("void %s(%s) {\n\t%s\n}\n", $2, $4, $7);}
+|   KW_DEF TK_ID '(' parameters ')' FN_RETURN general_var_types ':' function_body KW_ENDDEF ';' {$$ = template("%s %s(%s) {\n\t%s\n}\n", $7, $2, $4, $9);}
 ;
 
 parameters:
@@ -309,9 +309,9 @@ function_arguments:
 
 /* general function body */
 function_body:
-    general_statements
+    general_statements  
 |   general_declarations
-|   function_body general_statements    {$$ = template("%s\n%s", $1, $2);}
+|   function_body general_statements    {$$ = template("%s\n\t%s", $1, $2);}
 |   function_body general_declarations  {$$ = template("%s\n%s", $1, $2);}
 ;
 
@@ -368,6 +368,7 @@ assigning_expressions:
 identifier_expressions:
     TK_ID
 |   TK_ID '[' TK_ID ']' { $$ = template("%s[%s]", $1, $3); }
+|   TK_ID '[' TK_INT ']' { $$ = template("%s[%s]", $1, $3); }
 ;
 
 
@@ -381,12 +382,16 @@ general_statements:
 |   break_statement
 |   continue_statement
 |   return_statement
-|   function_statement
+|   functions_inline_statements
 |   empty_statement
 ;
 
 assign_statement:
     assigning_expressions ';' {$$ = template("%s;", $1);}
+;
+
+functions_inline_statements:
+    function_statement ';' {$$ = template("%s;", $1);}
 ;
 
 if_statement:
@@ -417,8 +422,8 @@ return_statement:
 ;
 
 function_statement:
-    TK_ID '(' ')' ';' {$$ = template("%s();", $1);}
-|   TK_ID '(' function_arguments ')' ';' {$$ = template("%s(%s);", $1, $3);}
+    TK_ID '(' ')' {$$ = template("%s()", $1);}
+|   TK_ID '(' function_arguments ')' {$$ = template("%s(%s)", $1, $3);}
 ;
 
 empty_statement:
