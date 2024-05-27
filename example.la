@@ -1,55 +1,15 @@
-limit, num, counter: integer;
+-- A piece of Theta code for demonstration purposes
 
-def prime(n: integer)-> bool: 
-   i: integer; 
-   result, isPrime: bool;
-      
-  if (n < 0): 
-    result = prime(-n);
-  else: 
-    if (n < 2): 
-      result = False;    
-    else: 
-      if (n == 2): 
-        result = True;
-      else: 
-        if (n % 2 == 0):
-          result = False;
-        else:  
-          i = 3;
-          isPrime = True;
-          while (isPrime and (i < n / 2) ): 
-            isPrime = n % i != 0;
-            i = i + 2;
-          endwhile;
-          result = isPrime;
-        endif;
-      endif;
-    endif;
-  endif;
-   
-  return result;
-enddef;
+const N = 100: integer;
+
+a[100]: integer;
 
 def main(): 
 
-  limit = readInteger();  
-
-  -- 2 is prime
-  writeInteger(2);
-  writeStr(" "); 
-
-  counter = 1; -- count the prime numbers found
-  -- check only odd numbers for primality  
-  for num in [3: limit + 1: 2]:  
-    if (prime(num)):  
-      counter = counter + 1;
-      writeInteger(num);
-      writeStr(" ");
-    endif;      
+  for i in [0:N]:
+    a[i] = i;
   endfor;
+
+  half := [ x / 2 for x: integer in a of 100] : scalar;
   
-   writeStr("\nThe total number of primes found is:");
-   writeInteger(counter);
-   writeStr("\n");   
 enddef;

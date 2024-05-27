@@ -1,12 +1,57 @@
+EXAMPLES_DIR = lamda_examples
+SINGLE_EXAMPLE = example.la
+
+COLOR_GREEN = \033[32m
+COLOR_RED = \033[31m
+COLOR_RESET = \033[0m
+
 all:
 	bison -d -v -r all myanalyzer.y
 	flex mylexer.l
-	gcc -o compiler lex.yy.c myanalyzer.tab.c cgen.c -lfl
-	@if [ -f example.la ]; then ./compiler < example.la; echo -n ""; fi
+	gcc -o mycompiler lex.yy.c myanalyzer.tab.c cgen.c -lfl
 
+	@if [ -f $(SINGLE_EXAMPLE) ]; then \
+		./mycompiler < $(SINGLE_EXAMPLE);\
+		if [ -f c_file.c ]; then \
+			if gcc -o c_file c_file.c lambdalib.h -I.; then \
+				echo "✔️ $(COLOR_GREEN) Passed $(COLOR_RESET)- $(SINGLE_EXAMPLE)"; \
+				rm c_file.c c_file; \
+			else \
+				echo "❌$(COLOR_RED) Failed $(COLOR_RESET)- $(SINGLE_EXAMPLE)"; \
+			fi; \
+		else \
+			echo "❌$(COLOR_RED) Failed $(COLOR_RESET)- $(SINGLE_EXAMPLE): Couldn't create .c file!"; \
+		fi; \
+	fi
+
+
+# Target to run and test all examples
 test:
-	gcc -o test c_file.c lambdalib.h -I.
+	bison -d -v -r all myanalyzer.y
+	flex mylexer.l
+	gcc -o mycompiler lex.yy.c myanalyzer.tab.c cgen.c -lfl
+
+	@echo "\nRunning tests..."
+	@passed=0; \
+	failed=0; \
+	for example in $(EXAMPLES_DIR)/*.la; do \
+		./mycompiler < $$example > /dev/null 2>&1; \
+		if [ -f c_file.c ]; then \
+			if gcc -o c_file c_file.c lambdalib.h -I.; then \
+				echo "✔️ $(COLOR_GREEN) Passed $(COLOR_RESET)- $$example"; \
+				rm c_file.c c_file; \
+				passed=$$((passed + 1)); \
+			else \
+				echo "❌$(COLOR_RED) Failed $(COLOR_RESET)- $$example"; \
+				failed=$$((failed + 1)); \
+			fi; \
+		else \
+			echo "❌$(COLOR_RED) Failed $(COLOR_RESET)- $$example: Couldn't create .c file!"; \
+			failed=$$((failed + 1)); \
+		fi; \
+	done; \
+	echo "\nTests completed: $$passed passed, $$failed failed.\n"
 
 clean:
-	rm -rf mylexer compiler lex.yy.c myanalyzer.tab.c myanalyzer.tab.h myanalyzer.output c_file.c test
+	rm -rf lex.yy.c myanalyzer.tab.c myanalyzer.tab.h myanalyzer.output mycompiler c_file c_file.c
 	clear
