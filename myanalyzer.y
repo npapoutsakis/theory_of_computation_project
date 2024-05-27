@@ -103,6 +103,7 @@
 %type <string> function
 %type <string> parameters
 %type <string> function_arguments
+%type <string> general_function_body
 
 %type <string> general_expression
 %type <string> arithmetic_expressions
@@ -124,7 +125,6 @@
 %type <string> array_comprehension
 %type <string> version_1 version_2
 %type <string> statement_block
-
 
 
 %%
@@ -160,7 +160,7 @@ c_file:
 
 /*------------------------------------------ main function in c ----------------------------------------*/
 main_function:
-    KW_DEF KW_BEGIN '(' ')' ':' function_body KW_ENDDEF ';' {$$ = template("\nint main() {\n\t%s\n}", $6);}
+    KW_DEF KW_BEGIN '(' ')' ':' general_function_body KW_ENDDEF ';' {$$ = template("\nint main() {\n\t%s\n}", $6);}
 ;
 
 /* declaration body is responsible for variable declaration (of any type) above main, that include functions and comps */
@@ -272,13 +272,15 @@ comp_array_var_declaration:
 ;
 
 comp_func_declarations:
-    KW_DEF TK_ID '(' parameters ')' ':' function_body KW_ENDDEF ';' {
+    KW_DEF TK_ID '(' parameters ')' ':' general_function_body KW_ENDDEF ';' {
+        printf("%s\n", $7);
         if(!strcmp($4, ""))
             $$ = template("\tvoid (*%s)(SELF);", $2);
         else
             $$ = template("\tvoid (*%s)(SELF, %s);", $2, $4);
     }
-|   KW_DEF TK_ID '(' parameters ')' FN_RETURN general_var_types ':' function_body KW_ENDDEF ';' {
+|   KW_DEF TK_ID '(' parameters ')' FN_RETURN general_var_types ':' general_function_body KW_ENDDEF ';' {
+        printf("%s\n", $9);
         if (!strcmp($4, ""))
             $$ = template("\t%s (*%s)(SELF);", $7, $2);
         else 
@@ -290,8 +292,8 @@ comp_func_declarations:
 
 /* -------------------------------------------- Functions & Parameters Declaration ---------------------------------------------*/
 function:
-    KW_DEF TK_ID '(' parameters ')' ':' function_body KW_ENDDEF ';'                             {$$ = template("void %s(%s) {\n\t%s\n}\n", $2, $4, $7);}
-|   KW_DEF TK_ID '(' parameters ')' FN_RETURN general_var_types ':' function_body KW_ENDDEF ';' {$$ = template("%s %s(%s) {\n\t%s\n}\n", $7, $2, $4, $9);}
+    KW_DEF TK_ID '(' parameters ')' ':' general_function_body KW_ENDDEF ';'                             {$$ = template("void %s(%s) {\n\t%s\n}\n", $2, $4, $7);}
+|   KW_DEF TK_ID '(' parameters ')' FN_RETURN general_var_types ':' general_function_body KW_ENDDEF ';' {$$ = template("%s %s(%s) {\n\t%s\n}\n", $7, $2, $4, $9);}
 ;
 
 parameters:
@@ -308,6 +310,11 @@ function_arguments:
 ;
 
 /* general function body */
+general_function_body:
+    %empty {$$ = "";}
+|   function_body
+;
+
 function_body:
     general_statements  
 |   general_declarations
