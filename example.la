@@ -1,15 +1,24 @@
--- A piece of Theta code for demonstration purposes
+-- File: useless.ka
+-- A piece of Kappa code for demonstration purposes
 
-const N = 100: integer;
+@defmacro N -100
 
-a[100]: integer;
+a, b: integer;
+
+def cube(i: integer)-> integer:
+   return i*i*i;
+enddef;
+   
+def add(n: int, k: int)-> integer:
+   j: integer;
+  
+   j = (N-n) + cube(k);
+   writeInteger(j);
+   return j;
+enddef;
 
 def main(): 
-
-  for i in [0:N]:
-    a[i] = i;
-  endfor;
-
-  half := [ x / 2 for x: integer in a of 100] : scalar;
-  
+   a = readInteger();
+   b = readInteger();
+   add(a, b); -- Here you can see some dummy comments!
 enddef;

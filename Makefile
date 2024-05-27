@@ -9,15 +9,13 @@ all:
 	bison -d -v -r all myanalyzer.y
 	flex mylexer.l
 	gcc -o mycompiler lex.yy.c myanalyzer.tab.c cgen.c -lfl
-
 	@if [ -f $(SINGLE_EXAMPLE) ]; then \
 		./mycompiler < $(SINGLE_EXAMPLE);\
 		if [ -f c_file.c ]; then \
-			if gcc -o c_file c_file.c lambdalib.h -I.; then \
+			if gcc -o c_file c_file.c lambdalib.h -I. 2>/dev/null; then \
 				echo "✔️ $(COLOR_GREEN) Passed $(COLOR_RESET)- $(SINGLE_EXAMPLE)"; \
-				rm c_file.c c_file; \
 			else \
-				echo "❌$(COLOR_RED) Failed $(COLOR_RESET)- $(SINGLE_EXAMPLE)"; \
+				echo "❌$(COLOR_RED) Failed $(COLOR_RESET)- $(SINGLE_EXAMPLE): Couldn't be compiled!"; \
 			fi; \
 		else \
 			echo "❌$(COLOR_RED) Failed $(COLOR_RESET)- $(SINGLE_EXAMPLE): Couldn't create .c file!"; \
@@ -37,12 +35,12 @@ test:
 	for example in $(EXAMPLES_DIR)/*.la; do \
 		./mycompiler < $$example > /dev/null 2>&1; \
 		if [ -f c_file.c ]; then \
-			if gcc -o c_file c_file.c lambdalib.h -I.; then \
+			if gcc -o c_file c_file.c lambdalib.h -I. 2>/dev/null; then \
 				echo "✔️ $(COLOR_GREEN) Passed $(COLOR_RESET)- $$example"; \
 				rm c_file.c c_file; \
 				passed=$$((passed + 1)); \
 			else \
-				echo "❌$(COLOR_RED) Failed $(COLOR_RESET)- $$example"; \
+				echo "❌$(COLOR_RED) Failed $(COLOR_RESET)- $$example: Couldn't be compiled!"; \
 				failed=$$((failed + 1)); \
 			fi; \
 		else \
