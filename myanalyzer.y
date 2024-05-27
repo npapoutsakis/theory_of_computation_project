@@ -11,6 +11,7 @@
     char* apply_char_star(const char*);
     char* fix_multiple_char_stars(char *, char *, int);
     char* parseExpression(char *, char *, char *);
+    char **comp_functions = NULL;
 %}
 
 %union{
@@ -240,7 +241,7 @@ comp_declarations:
                         "typedef struct %s {\n%s\n} %s;\n"
                         "\n\n%s\n\n"
                         "const %s ctor_%s = { %s };\n"
-                        "#undef SELF;", $2, $2, $4, $2, "", $2, $2, "", "");}
+                        "#undef SELF;", $2, $2, $4, $2, "", $2, $2, "");}
 ;
 
 /* check if comp body is empty */
@@ -273,18 +274,21 @@ comp_array_var_declaration:
 
 comp_func_declarations:
     KW_DEF TK_ID '(' parameters ')' ':' general_function_body KW_ENDDEF ';' {
-        printf("%s\n", $7);
-        if(!strcmp($4, ""))
-            $$ = template("\tvoid (*%s)(SELF);", $2);
-        else
-            $$ = template("\tvoid (*%s)(SELF, %s);", $2, $4);
+
+        
+        comp_functions = realloc(comp_functions, )
+        
+        comp_functions = strdup(template("void %s(SELF) {\n\t%s\n}", $2, $7));
+
+        
+
+
+
+
+        $$ = template("\tvoid (*%s)(SELF%s%s);", $2, (strcmp($4, "")) ? ", " : "", $4);
     }
-|   KW_DEF TK_ID '(' parameters ')' FN_RETURN general_var_types ':' general_function_body KW_ENDDEF ';' {
-        printf("%s\n", $9);
-        if (!strcmp($4, ""))
-            $$ = template("\t%s (*%s)(SELF);", $7, $2);
-        else 
-            $$ = template("\t%s (*%s)(SELF, %s);", $7, $2, $4);
+|   KW_DEF TK_ID '(' parameters ')' FN_RETURN general_var_types ':' general_function_body KW_ENDDEF ';' { 
+        $$ = template("\t%s (*%s)(SELF%s%s);", $7, $2, (strcmp($4, "")) ? ", " : "", $4);
     }
 ;
 
@@ -376,6 +380,7 @@ identifier_expressions:
     TK_ID
 |   TK_ID '[' TK_ID ']' { $$ = template("%s[%s]", $1, $3); }
 |   TK_ID '[' TK_INT ']' { $$ = template("%s[%s]", $1, $3); }
+|   '#' TK_ID { $$ = template("self->%s", $2); }
 ;
 
 

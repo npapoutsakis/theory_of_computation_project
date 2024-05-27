@@ -52,4 +52,3 @@ test:
 
 clean:
 	rm -rf lex.yy.c myanalyzer.tab.c myanalyzer.tab.h myanalyzer.output mycompiler c_file c_file.c
-	clear
