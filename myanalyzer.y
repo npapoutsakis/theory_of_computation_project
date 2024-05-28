@@ -12,6 +12,7 @@
     char* fix_multiple_char_stars(char *, char *, int);
     char* parseExpression(char *, char *, char *);
     char **comp_functions = NULL;
+    int comp_function_number = 0;
 %}
 
 %union{
@@ -221,7 +222,6 @@ array_declaration:
 
 
 
-
 /* -------------------------------------------- Constant Variables Declaration ---------------------------------------------*/
 const_declarations:
     KW_CONST var_identifiers ASSIGN assinged_values ':' general_var_types ';' {$$ = template("const %s %s = %s;", $6, $2, $4);}
@@ -233,15 +233,24 @@ assinged_values:
 ;
 
 
-
 /* -------------------------------------------- Complex type declarations ---------------------------------------------*/
 comp_declarations:
     KW_COMP TK_ID ':' comp_body_check KW_ENDCOMP ';' {
+        char *functions = malloc(1);
+        for(int i = 0; i < comp_function_number; i++){
+            functions= (char *)realloc(functions, strlen(functions) + strlen(comp_functions[i]) + 1);
+            strcat(functions, comp_functions[i]);
+            printf("%s\n", functions);
+        }
         $$ = template("\n#define SELF struct %s *self\n"
                         "typedef struct %s {\n%s\n} %s;\n"
-                        "\n\n%s\n\n"
+                        "\n%s\n"
                         "const %s ctor_%s = { %s };\n"
-                        "#undef SELF;", $2, $2, $4, $2, "", $2, $2, "");}
+                        "#undef SELF;", $2, $2, $4, $2, functions, $2, $2, "");
+    
+        comp_function_number = 0;
+        free(functions);
+    }
 ;
 
 /* check if comp body is empty */
@@ -274,20 +283,13 @@ comp_array_var_declaration:
 
 comp_func_declarations:
     KW_DEF TK_ID '(' parameters ')' ':' general_function_body KW_ENDDEF ';' {
-
-        
-        comp_functions = realloc(comp_functions, )
-        
-        comp_functions = strdup(template("void %s(SELF) {\n\t%s\n}", $2, $7));
-
-        
-
-
-
-
+        comp_functions = realloc(comp_functions, sizeof((template("\nvoid %s(SELF%s%s) {\n\t%s\n}\n", $2, (strcmp($4, "")) ? ", " : "", $4, $7))));
+        comp_functions[comp_function_number++] = strdup(template("\nvoid %s(SELF%s%s) {\n\t%s\n}\n", $2, (strcmp($4, "")) ? ", " : "", $4, $7));
         $$ = template("\tvoid (*%s)(SELF%s%s);", $2, (strcmp($4, "")) ? ", " : "", $4);
     }
 |   KW_DEF TK_ID '(' parameters ')' FN_RETURN general_var_types ':' general_function_body KW_ENDDEF ';' { 
+        comp_functions = realloc(comp_functions, sizeof((template("\n%s %s(SELF%s%s) {\n\t%s\n}\n", $7, $2, (strcmp($4, "")) ? ", " : "", $4, $9))));
+        comp_functions[comp_function_number++] = strdup(template("\n%s %s(SELF%s%s) {\n\t%s\n}\n", $7, $2, (strcmp($4, "")) ? ", " : "", $4, $9));
         $$ = template("\t%s (*%s)(SELF%s%s);", $7, $2, (strcmp($4, "")) ? ", " : "", $4);
     }
 ;
