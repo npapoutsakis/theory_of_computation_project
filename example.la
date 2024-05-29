@@ -34,5 +34,46 @@ comp Person:
 
 endcomp;
 
+comp Book:
+  #title, #isbn: str;
+  #author: Person;  
+  #numOfCopies: integer;
+  #price: scalar;
+
+  def setBook(t: str, a: Person, numOfCopies: integer, price: scalar) -> integer:
+    #title = t;
+    #author = a;
+    #numOfCopies = numOfCopies;
+    #price = price;
+  enddef;
+
+  def printBook():
+    write("Title: %s\n", #title);
+    writeStr("Author:");
+    write("Price:%f\n", #price);
+    write("Number of available copies: %d\n", #numOfCopies);    
+  enddef;
+endcomp;
+
+comp Order:
+  #orderNum: integer;
+  #book: Book;
+  #quantity: integer;
+  #shippingAddress: Address;
+  #delivered: bool;
+
+  def setOrder(orNum: integer, b: Book, q: integer, sh: Address, del: bool):
+    #orderNum = orNum;
+    #book = b;
+    #quantity = q;
+    #shippingAddress = sh;
+    #delivered = del;
+  enddef;
+
+  def printOrder():
+
+  enddef;
+
+endcomp;
 def main():
 enddef;
