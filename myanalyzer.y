@@ -11,10 +11,16 @@
     char* apply_char_star(const char*);
     char* fix_multiple_char_stars(char *, char *, int);
     char* parseExpression(char *, char *, char *);
+    char *fix_comp_var_declaration(char*, char*);
     char **comp_functions = NULL;
     char **comp_function_names = NULL;
+
+    char *caller = NULL;
     int comp_function_number = 0; 
     int comp_function_names_num = 0;
+
+    int comp_variable_flag = 0;
+    int comp_function_flag = 0;
 %}
 
 %union{
@@ -103,6 +109,7 @@
 %type <string> comp_var_identifiers
 %type <string> comp_array_var_declaration
 %type <string> comp_func_declarations
+%type <string> comp_vars
 
 %type <string> function
 %type <string> parameters
@@ -114,6 +121,7 @@
 %type <string> relational_expressions
 %type <string> assigning_expressions
 %type <string> identifier_expressions
+%type <string> complex_expressions
 
 %type <string> general_statements 
 %type <string> assign_statement
@@ -207,8 +215,8 @@ basic_var_types:
 
 /* -------------------------------------------- Simple Variables Declaration ---------------------------------------------*/
 var_declarations:
-    var_identifiers ':' general_var_types ';'   {$$ = fix_multiple_char_stars($1, $3, 1);}
-|   array_declaration ':' general_var_types ';' {$$ = fix_multiple_char_stars($1, $3, 1);}
+    var_identifiers ':' basic_var_types ';'   {$$ = fix_multiple_char_stars($1, $3, 1);}
+|   array_declaration ':' basic_var_types ';' {$$ = fix_multiple_char_stars($1, $3, 1);}
 ;
 
 /* we also have arrays and comp data types with Identifiers and variable */
@@ -238,6 +246,8 @@ assinged_values:
 /* -------------------------------------------- Complex type declarations ---------------------------------------------*/
 comp_declarations:
     KW_COMP TK_ID ':' comp_body_check KW_ENDCOMP ';' {
+        comp_variable_flag = 0;
+        comp_function_flag = 0;
         char *functions = malloc(1);
         *functions = '\0';
 
@@ -261,7 +271,7 @@ comp_declarations:
                         "typedef struct %s {\n%s\n} %s;\n"
                         "\n%s\n"
                         "const %s ctor_%s = { %s };\n"
-                        "#undef SELF;", $2, $2, $4, $2, functions, $2, $2, names);
+                        "#undef SELF", $2, $2, $4, $2, functions, $2, $2, names);
     
         comp_function_number = 0;
         comp_function_names_num = 0;
@@ -284,7 +294,7 @@ comp_body:
 ;
 
 comp_var_declarations:
-    comp_var_identifiers ':' general_var_types ';'        {$$ = fix_multiple_char_stars($1, $3, 0);}
+    comp_var_identifiers ':' general_var_types ';'        {comp_variable_flag = 1; $$ = fix_multiple_char_stars($1, $3, 0);}
 |   comp_array_var_declaration ':' general_var_types ';'  {$$ = fix_multiple_char_stars($1, $3, 0);}
 ;
 
@@ -300,6 +310,7 @@ comp_array_var_declaration:
 
 comp_func_declarations:
     KW_DEF TK_ID '(' parameters ')' ':' general_function_body KW_ENDDEF ';' {
+
         comp_functions = realloc(comp_functions, sizeof((template("\nvoid %s(SELF%s%s) {\n\t%s\n}\n", $2, (strcmp($4, "")) ? ", " : "", $4, $7))));
         comp_functions[comp_function_number++] = strdup(template("\nvoid %s(SELF%s%s) {\n\t%s\n}\n", $2, (strcmp($4, "")) ? ", " : "", $4, $7));
 
@@ -310,6 +321,7 @@ comp_func_declarations:
         $$ = template("\tvoid (*%s)(SELF%s%s);", $2, (strcmp($4, "")) ? ", " : "", $4);
     }
 |   KW_DEF TK_ID '(' parameters ')' FN_RETURN general_var_types ':' general_function_body KW_ENDDEF ';' { 
+
         comp_functions = realloc(comp_functions, sizeof((template("\n%s %s(SELF%s%s) {\n\t%s\n}\n", $7, $2, (strcmp($4, "")) ? ", " : "", $4, $9))));
         comp_functions[comp_function_number++] = strdup(template("\n%s %s(SELF%s%s) {\n\t%s\n}\n", $7, $2, (strcmp($4, "")) ? ", " : "", $4, $9));
 
@@ -320,6 +332,9 @@ comp_func_declarations:
     }
 ;
 
+comp_vars:
+    var_identifiers ':' TK_ID ';' {$$ = fix_comp_var_declaration($1, $3);}
+;
 
 
 /* -------------------------------------------- Functions & Parameters Declaration ---------------------------------------------*/
@@ -348,10 +363,12 @@ general_function_body:
 ;
 
 function_body:
-    general_statements  
+    comp_vars
+|   general_statements  
 |   general_declarations
 |   function_body general_statements    {$$ = template("%s\n\t%s", $1, $2);}
-|   function_body general_declarations  {$$ = template("%s\n%s", $1, $2);}
+|   function_body general_declarations  {$$ = template("%s\n\t%s", $1, $2);}
+|   function_body comp_vars             {$$ = template("%s\n\t%s", $1, $2);}
 ;
 
 
@@ -370,6 +387,7 @@ general_expression:
 |   assigning_expressions                         {$$ = $1;}
 |   identifier_expressions                        {$$ = $1;}
 |   function_statement                            {$$ = $1;}
+|   complex_expressions                           {comp_function_flag = 1; $$ = $1;}
 ;
 
 arithmetic_expressions:
@@ -407,10 +425,22 @@ identifier_expressions:
     TK_ID
 |   TK_ID '[' TK_ID ']' { $$ = template("%s[%s]", $1, $3); }
 |   TK_ID '[' TK_INT ']' { $$ = template("%s[%s]", $1, $3); }
-|   '#' TK_ID { $$ = template("self->%s", $2); }
+|   '#' TK_ID { 
+        const char* format = comp_variable_flag ? "self->%s" : "%s";
+        $$ = template(format, $2); 
+    }
+|   '#' TK_ID '[' identifier_expressions ']' {
+        const char* format = comp_variable_flag ? "self->%s[%s]" : "%s[%s]";
+        $$ = template(format, $2, $4); 
+    }
 ;
 
-
+complex_expressions:
+    general_expression '.' general_expression {
+        caller = strdup($1);
+        $$ = template("%s.%s", $1, $3);
+    }
+;
 
 /* -------------------------------------------- Statements ---------------------------------------------*/
 general_statements:
@@ -462,8 +492,21 @@ functions_inline_statements:
 ;
 
 function_statement:
-    TK_ID '(' ')' {$$ = template("%s()", $1);}
-|   TK_ID '(' function_arguments ')' {$$ = template("%s(%s)", $1, $3);}
+    TK_ID '(' ')' {
+        
+        if(comp_function_flag){
+            $$ = template("%s(&%s)", $1, caller);
+        }
+        else
+            $$ = template("%s()", $1);
+
+    }
+|   TK_ID '(' function_arguments ')' {
+    
+    
+        $$ = template("%s(%s)", $1, $3);
+
+    }
 ;
 
 array_comprehension:
@@ -510,6 +553,31 @@ int main() {
     }
     printf("\x1b[31m""Rejected!\n""\x1b[0m");
 }
+
+char* fix_comp_var_declaration(char* identifiers, char* type) {
+    char* result = malloc(1);
+    *result = '\0';
+
+    char* token = strtok(identifiers, ", ");
+    int first = 1;
+    while (token) {
+        if (first) {
+            char* temp = template("%s %s = ctor_%s", type, token, type);
+            result = (char*)realloc(result, strlen(result) + strlen(temp) + 3);
+            strcat(result, temp);
+            first = 0;
+        } else {
+            char* temp = template(", %s = ctor_%s", token, type);
+            result = (char*)realloc(result, strlen(result) + strlen(temp) + 3);
+            strcat(result, temp);
+        }
+        token = strtok(NULL, ", ");
+    }
+    strcat(result, ";");
+
+    return result;
+}
+
 
 char *parseExpression(char *expression, char *identifier, char *array){    
     char *modifiedExpression = NULL;
@@ -560,6 +628,7 @@ char *parseExpression(char *expression, char *identifier, char *array){
     return modifiedExpression;
 }
 
+
 char *fix_multiple_char_stars(char *id, char* type, int global){
     
     if(global){
@@ -574,6 +643,7 @@ char *fix_multiple_char_stars(char *id, char* type, int global){
 
     return template("\t%s %s;", type, id);
 }
+
 
 char *apply_char_star(const char* var_list) {
     char* result = (char*)malloc(strlen(var_list) * 2 + 1); // allocate sufficient memory

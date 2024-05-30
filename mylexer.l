@@ -22,7 +22,7 @@
 /*definitions*/
 DIGIT [0-9]
 IDENTIFIER [a-zA-Z][0-9a-zA-Z_]*
-INTEGER_CONSTANT [+-]?{DIGIT}{DIGIT}*
+INTEGER_CONSTANT {DIGIT}{DIGIT}*
 DOUBLE_CONSTANT ([+-]?{DIGIT}+\.{DIGIT}+([Ee][+-]?{DIGIT}+)?)
 CONST_STRING \"[^\n]*\"
 LINE_COMMENT "--"[^\n]*

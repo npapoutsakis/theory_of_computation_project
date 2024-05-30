@@ -6,9 +6,9 @@ COLOR_RED = \033[31m
 COLOR_RESET = \033[0m
 
 all:
-	bison -d -v -r all myanalyzer.y
+	bison -d -v -r all myanalyzer.y -Wcounterexamples
 	flex mylexer.l
-	gcc -o mycompiler lex.yy.c myanalyzer.tab.c cgen.c -lfl
+	gcc -o mycompiler lex.yy.c myanalyzer.tab.c cgen.c -lfl 
 	@if [ -f $(SINGLE_EXAMPLE) ]; then \
 		./mycompiler < $(SINGLE_EXAMPLE);\
 		if [ -f c_file.c ]; then \

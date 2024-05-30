@@ -40,7 +40,7 @@ comp Book:
   #numOfCopies: integer;
   #price: scalar;
 
-  def setBook(t: str, a: Person, numOfCopies: integer, price: scalar) -> integer:
+  def setBook(t: str, a: Person, numOfCopies: integer, price: scalar):
     #title = t;
     #author = a;
     #numOfCopies = numOfCopies;
@@ -75,5 +75,85 @@ comp Order:
   enddef;
 
 endcomp;
+
+comp Bookstore:
+  #name: str;
+  #listOfBooks[100]: Book;
+  #numOfBooks: integer;
+  #listOfOrders[100]: Order;
+  #numOfOrders: integer;
+
+  def putOrder(o: Order):    
+    #listOfOrders[#numOfOrders] = o;
+    #numOfOrders += 1;
+  enddef;
+ 
+  def addBook(b: Book):    
+    #listOfBooks[#numOfBooks] = b;
+    #numOfBooks += 1;
+  enddef;
+
+  def printBookStoreBooks():
+    for i in [0 : #numOfBooks]:
+        ;
+    endfor;
+  enddef;
+
+endcomp;
+
+orderId: integer;
+
+-- factory functions
+def createAddress(s: str, n: integer, c: str)-> Address:
+  a: Address;
+  return a;
+enddef;
+
+def createPerson(fn: str, ln: str, email: str, phone: integer, addr: Address)-> Person:
+  p: Person;
+  return p;
+enddef;
+
+def createBook(t: str, a: Person, numOfCopies: integer, price: scalar)-> Book:
+  b: Book;
+  return b;
+enddef;
+
+def createOrder(orNum: integer, b: Book, q: integer, sh: Address, del: bool)-> Order:
+  ord: Order;
+  return ord;
+enddef;
+
+def createBookstore(n: str)->Bookstore:
+  bs: Bookstore;
+  
+  return bs;
+enddef;
+
 def main():
+  orderId = 0;
+
+  a, a1: Address;
+  a = createAddress("Stadiou", 10, "Stadiou");  
+
+  author: Person;
+  author = createPerson("Christos","Papadimitriou","cpap@gmail.com", 12345, a);   
+
+  b: Book;
+  b = createBook("Computation Theory", author, 34.3, 100);
+  
+  bs: Bookstore;
+  bs = createBookstore("Papasotiriou");
+  
+
+  a = createAddress("Wall Street", 10, "NY");
+  author = createPerson("Dennis", "Richie", "richie@gmail.com", 54321, a);
+  b = createBook("C Programming", author, 10.3, 100);  
+
+
+  ord : Order;
+  ord = createOrder(orderId, b, 2, a, False );  
+  orderId +=  1;
+  
+
 enddef;
