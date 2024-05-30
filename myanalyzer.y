@@ -7,18 +7,16 @@
     #include "cgen.h"
 
     int yylex(void);
-    int line_num;
+    extern int line_num;
     char* apply_char_star(const char*);
     char* fix_multiple_char_stars(char *, char *, int);
     char* parseExpression(char *, char *, char *);
     char *fix_comp_var_declaration(char*, char*);
     char **comp_functions = NULL;
     char **comp_function_names = NULL;
-
     char *caller = NULL;
     int comp_function_number = 0; 
     int comp_function_names_num = 0;
-
     int comp_variable_flag = 0;
     int comp_function_flag = 0;
 %}
@@ -548,10 +546,10 @@ statement_block:
 %%
 int main() {
     if(!yyparse()) {
-        printf("\x1b[32m""Accepted!\n""\x1b[0m"); 
+        printf("\x1b[32m""Your program is syntactically correct!\n""\x1b[0m"); 
         return -1;
     }
-    printf("\x1b[31m""Rejected!\n""\x1b[0m");
+    printf("\x1b[31m""Syntax error in line %d\n""\x1b[0m", line_num);
 }
 
 char* fix_comp_var_declaration(char* identifiers, char* type) {

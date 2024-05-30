@@ -32,7 +32,7 @@ comp Person:
     write("%s %s, email: %s phone: %d\n", #firstName, #lastName, #email, #phone);
   enddef;
 
-endcomp;
+endcomp
 
 comp Book:
   #title, #isbn: str;
