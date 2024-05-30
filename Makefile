@@ -9,6 +9,7 @@ all:
 	flex mylexer.l
 	gcc -o mycompiler lex.yy.c myanalyzer.tab.c cgen.c -lfl
 
+test:
 	@echo "\nRunning tests..."
 	@passed=0; \
 	failed=0; \
