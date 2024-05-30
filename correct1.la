@@ -1,0 +1,57 @@
+-- Testing comments
+@defmacro N 100
+
+a, b: integer;
+
+def cube(i: integer)-> integer:
+   return i*i*i;
+enddef;
+   
+def add(n: int, k: int)-> integer:
+   j: integer;
+   j = (N-n) + cube(k);
+   writeInteger(j);
+   return j;
+enddef;
+
+def swap(a[]:integer, i:integer, j:integer):
+    temp:integer;
+    temp = a[i];
+    a[i] = a[j];
+    a[j] = temp;
+enddef;
+
+-- Print contents of an array of integers
+def printArray(a[]:integer, size:integer):
+    for i in [0:size]:
+        writeInteger(a[i]);
+        if (i==size-1):
+            continue;
+        endif;
+        writeStr(", ");
+    endfor;
+    writeStr("\n");
+enddef;
+
+def main(): 
+   a = readInteger();
+   b = readInteger();
+   add(a, b); -- Here you can see some dummy comments!
+
+   k: integer;
+
+   -- Create an array of integers using comprehension
+   a := [i+1 for i:100]:integer;
+
+   writeStr("Array generated: ");
+   printArray(a,100);
+
+   -- Reverse the array
+   for k in [0:50]:
+      swap(a,k,99-k);
+   endfor;
+
+   writeStr("Reversed array: ");
+   printArray(a,100);
+
+enddef;
