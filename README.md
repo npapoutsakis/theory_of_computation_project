@@ -1,4 +1,4 @@
-# Source-to-source compiler Project
+# Source-to-Source Compiler Project
 
 This project implements a compiler using Bison and Flex. It takes input files in a custom language format and generates corresponding C files, which are then compiled into executable binaries.
 
