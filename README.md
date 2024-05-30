@@ -55,6 +55,6 @@ To build and run the compiler, you'll need:
 
 To clean up generated files and executables, run:
 
-    ```bash
-    make clean
-    ```
+```bash
+make clean
+```
